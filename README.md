@@ -15,7 +15,7 @@ The PyMOL ChatGPT Plugin is a simple yet powerful tool that integrates OpenAI's 
 Or:
 
 ```
-load https://raw.githubusercontent.com/ChatMol/ChatMol/main/ChatMol.py
+load https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py
 ```
 
 ## Usage
