@@ -44,7 +44,7 @@ def chat_with_gpt(message):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            max_tokens=4000,
+            max_tokens=500,
             n=1,
             temperature=0.1,
         )
