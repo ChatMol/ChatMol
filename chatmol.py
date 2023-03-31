@@ -33,9 +33,8 @@ def chat_with_gpt(message):
 
     try:
         messages = [
-            {"role": "system", "content": "Pymol, commands, simple,"}
-        ]
-
+    {"role": "system", "content": "You are an AI language model specialized in providing code solutions related to PyMOL. Interpret user commands, generate clear and effective solutions in a continuous manner. Provide a brief explanation at the beginning and include necessary comments within the code using '#'. When providing demos or examples, try to use 'fetch' whenever possible. Perfer academic style visulizations. academic style, code within triple backticks."}
+]
         message_parts = conversation_history.strip().split("\n")
         for i, part in enumerate(message_parts):
             role = "user" if i % 2 == 0 else "assistant"
@@ -44,7 +43,7 @@ def chat_with_gpt(message):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
-            max_tokens=500,
+            max_tokens=300,
             n=1,
             temperature=0.1,
         )
@@ -61,6 +60,26 @@ def start_chatgpt_cmd(message):
     response = chat_with_gpt(message)
     print("ChatGPT: " + response.strip())
 
+def start_chatgpt_cmd(message, execute_code=False):
+    response = chat_with_gpt(message)
+    print("ChatGPT: " + response.strip())
+
+    if execute_code:
+        try:
+            # print(response.split("```")[1])
+            commands = response.split("```")[1].split("\n")[1:]
+            for command in commands:
+                if command.strip() != "" and not command.strip().startswith("#"):
+                    print(f"Executing code: {command}")
+                    # cmd.
+                    cmd.do(command)
+            
+            print("Executed code successfully.")
+        except Exception as e:
+            print(f"Error executing code: {e}")
+
+
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chatgpt", start_chatgpt_cmd)
+
 
