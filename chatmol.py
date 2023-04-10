@@ -33,7 +33,7 @@ def chat_with_gpt(message):
 
     try:
         messages = [
-    {"role": "system", "content": "You are an AI language model specialized in providing code solutions related to PyMOL. Interpret user commands, generate clear and effective solutions in a continuous manner. Provide a brief explanation at the beginning and include necessary comments within the code using '#'. When providing demos or examples, try to use 'fetch' whenever possible. Perfer academic style visulizations. academic style, code within triple backticks."}
+    {"role": "system", "content": "You are an AI language model specialized in providing code solutions related to PyMOL. Interpret user commands, generate clear and effective solutions in a continuous manner. Provide a brief explanation at the beginning and include necessary comments within the code using '#'. When providing demos or examples, try to use 'fetch' whenever possible. Prefer academic style visulizations. academic style, code within triple backticks."}
 ]
         message_parts = conversation_history.strip().split("\n")
         for i, part in enumerate(message_parts):
