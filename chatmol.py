@@ -53,7 +53,7 @@ def chat_with_gpt(message):
             messages=messages,
             max_tokens=1024,
             n=1,
-            temperature=0.1,
+            temperature=0,
         )
         answer = response.choices[0].message['content'].strip()
 
@@ -66,24 +66,44 @@ def chat_with_gpt(message):
 
 def start_chatgpt_cmd(message, execute:bool=True):
     global stashed_commands
-    if message.strip() == "e":
+    message = message.strip()
+    execution = True
+    if (message[-1] == '?'):
+        execution = False
+    if message.strip() == "e" or message.strip() == 'execute' :
+        if (len(stashed_commands) == 0):
+            print("There is no stashed commands")
         for command in stashed_commands:
             cmd.do(command)
+        # clear stash
+        stashed_commands.clear()
         return 0
-    if execute.lower() == "false":
+    
+    if message.strip() == "new":
+        # clear conversation history and stash
+        conversation_history = " "
+        stashed_commands.clear()
+        return 0
+    
+    if (message[-1] == '?'):
         execute = False
     response = chat_with_gpt(message)
     print("ChatGPT: " + response.strip())
 
     try:
         command_blocks = []
+        # I think it would be better to reset stashed_commands to empty for each chat.
+        # Stash should only keep commands of last conversation, not all commands of the whole history
+        stashed_commands.clear()
         for i, block in enumerate(response.split("```")):
             if i%2 == 1:
                 command_blocks.append(block)
         for command_block in command_blocks:
             for command in command_block.split("\n"):
                 if command.strip() != "" and not command.strip().startswith("#"):
-                    # print(f"Executing code: {command}")
+                    # Should skip "python", otherwise, not action will be displayed in 3D window
+                    if (command.strip() == "python"):
+                        continue
                     if "#" in command:
                         index_ = command.index("#")
                         if execute:
@@ -99,8 +119,7 @@ def start_chatgpt_cmd(message, execute:bool=True):
                             stashed_commands.append(command)
 
     except Exception as e:
-        print(f"Error executing code: {e}")
-
+        print(f"Error command execution code: {e}")
 
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
