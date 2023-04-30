@@ -6,13 +6,14 @@ import os
 conversation_history = " "    
 stashed_commands = []
 
-PLUGIN_DIR = os.path.dirname(os.path.abspath(__file__))
-API_KEY_FILE = os.path.join(PLUGIN_DIR, "apikey.txt")
+# Save API Key in ~/.PyMOL/apikey.txt
+API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
 
 def set_api_key(api_key):
     api_key = api_key.strip()
     openai.api_key = api_key
+    print("APIKEYFILE = ",API_KEY_FILE)
     try:
         with open(API_KEY_FILE, "w") as api_key_file:
             api_key_file.write(api_key)
@@ -22,6 +23,7 @@ def set_api_key(api_key):
 
 def load_api_key():
     api_key = os.getenv(OPENAI_KEY_ENV)
+    print("APIKEYFILE = ",API_KEY_FILE)
     if not api_key:
         try:
             with open(API_KEY_FILE, "r") as api_key_file:
@@ -66,6 +68,8 @@ def chat_with_gpt(message):
 
 def start_chatgpt_cmd(message, execute:bool=True):
     global stashed_commands
+    global conversation_history
+
     message = message.strip()
     execution = True
     if (message[-1] == '?'):

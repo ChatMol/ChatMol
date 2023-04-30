@@ -11,7 +11,8 @@ The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into
 1. Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
 2. Open PyMOL.
 3. In the PyMOL command line, enter `run /path/to/chatmol.py` (replace `/path/to` with the actual path to the script).
-4. The plugin is now installed and ready to use.
+4. Create a .PyMOL folder in your home director for saving PyMOL related files, like ChatGPT API keys, PyMOL license file etc.
+5. The plugin is now installed and ready to use.
 
 Alternatively, you can use the following command to load the plugin directly:
 
