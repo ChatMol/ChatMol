@@ -11,7 +11,8 @@ The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into
 1. Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
 2. Open PyMOL.
 3. In the PyMOL command line, enter `run /path/to/chatmol.py` (replace `/path/to` with the actual path to the script).
-4. The plugin is now installed and ready to use.
+4. Create a .PyMOL folder in your home director for saving PyMOL related files, like ChatGPT API keys, PyMOL license file etc.
+5. The plugin is now installed and ready to use.
 
 Alternatively, you can use the following command to load the plugin directly:
 
@@ -24,7 +25,10 @@ If you want a permentally installation, click `Plugin`, go to the `Plugin Manage
 
 ## Usage
 1. Set your OpenAI API key by entering the following command in the PyMOL command line: `set_api_key your_api_key_here` (replace `your_api_key_here` with your actual API key). The API key will be saved in the same directory as the plugin script for future use.
-2. Ask ChatGPT about how to perform PyMOL tasks. Use the `chat` command followed by your question or message in the PyMOL command line, e.g., `chat "How do I align two proteins?", False`. You will receive a helpful response such as:
+
+2. Execute PyMOL commands automatically with the ChatGPT Plugin. In PyMOL command line, use `chat` as the wake up word for ChatGPT plugin, followed by a message of your PyMOL tasks or even a question for how to use some of the PyMOL commands. Detailed instructions on how to use PyMOL commands will be displaed and the commands will be executed automatically by default. For example, `chat Show me example to color a protein by its secondary structures`. An example protein molecule will be displayed in PyMOL 3D window with molecule colored by its seconary structure. 
+
+3. Ask ChatMol about how to perform PyMOL tasks without execution the PyMOL commands. You can disable the automatic execution by adding a question mark `?` at the end of ChatMol prompt, e.g., `chat How do I align two proteins?`. You will receive a helpful response such as:
 ```text
 ChatGPT: To align two proteins in PyMOL, you can use the `align` command. Here's an example:
  
@@ -50,8 +54,10 @@ align 1tim and name CA+C+N+O, 1ake and name CA+C+N+O
  
 In this example, we use the `and` operator to select only the backbone atoms (`CA`, `C`, `N`, and `O`) for both proteins. This can be useful if you only want to align the backbone of the proteins, and ignore any side chain differences.
 ```
-commands will be saved every time, if you believe this is what you want, run `chat e` will execute satshed commands.
-3. If you trust ChatGPT, just remove the fasle from your command: `chat How do I color a protein by secondary structure?`.
+  commands from each query will be saved internally. if you want to execute all saved commands, run `chat e` or `chat execute`. After execution, the stashed commands are cleared.
+
+4. To start a new chat session, just enter the following in the PyMOL command line: `chat new`. This will let ChatMol clear the conversation history.
+
 
 ![img](./assets/img_ss.png)
 
