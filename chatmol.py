@@ -1,7 +1,10 @@
+import os
+import time
+import openai
+import socket
+import threading
 from pymol import cmd
 
-import openai
-import os
 
 conversation_history = " "    
 stashed_commands = []
@@ -9,6 +12,28 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
+
+def handle_client(client_socket, client_address):
+    print(f"Connection from {client_address} established.")
+    message = client_socket.recv(1024).decode('utf-8')
+    print(f"Received message: {message}")
+    client_socket.close()
+    cmd.do(message)
+
+def start_server():
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('localhost', 8100))
+    server_socket.listen(1)
+    print("Server is listening on port 8100...")
+
+    while True:
+        client_socket, client_address = server_socket.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+        client_thread.start()
+
+def start_listener():
+    server_thread = threading.Thread(target=start_server)
+    server_thread.start()
 
 def set_api_key(api_key):
     api_key = api_key.strip()
@@ -35,6 +60,8 @@ def load_api_key():
                   f" or by environment variable '{OPENAI_KEY_ENV}'.")
 
 load_api_key()
+start_listener()
+
 
 def chat_with_gpt(message):
     global conversation_history
