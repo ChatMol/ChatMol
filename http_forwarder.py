@@ -1,7 +1,9 @@
 from flask import Flask, request
+from flask_cors import CORS
 import socket
 
 app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
