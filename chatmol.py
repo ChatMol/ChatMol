@@ -6,12 +6,18 @@ import threading
 from pymol import cmd
 from flask import Flask, request
 from flask_cors import CORS
+from werkzeug.serving import make_server, WSGIRequestHandler
 import socket
 import chardet  # Add this line at the top of the file
 
 
 app = Flask(__name__)
 CORS(app)  # Add this line to enable CORS
+
+class CustomRequestHandler(WSGIRequestHandler):
+    def log_message(self, format, *args):
+        # Silence server output
+        pass
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
@@ -29,7 +35,9 @@ def send_message():
         return f'Error: {e}', 500
 
 def run_flask_service():
-    app.run(port=8101)
+    server = make_server("localhost", 8101, app, request_handler=CustomRequestHandler)
+    server.serve_forever()
+    #app.run(port=8101, use_reloader=False)
 
 conversation_history = " "    
 stashed_commands = []
@@ -57,13 +65,19 @@ def start_server():
         client_thread.start()
 
 def start_listener():
-    server_thread = threading.Thread(target=start_server)
-    server_thread.start()
+    try: 
+        server_thread = threading.Thread(target=start_server)
+        server_thread.start()
+        print("Port 8100 is ready for service ......................")
 
-    # Create a thread to run the Flask service
-    flask_thread = threading.Thread(target=run_flask_service)
-    # Start the thread
-    flask_thread.start()
+        # Create a thread to run the Flask service
+        flask_thread = threading.Thread(target=run_flask_service)
+        print("Flask thread is created ............................")
+        # Start the thread
+        flask_thread.start()
+        print("Flask thread is ready ..............................")
+    except Exception as e:
+        print(f"Error processing message: {e}")
 
 def set_api_key(api_key):
     api_key = api_key.strip()
