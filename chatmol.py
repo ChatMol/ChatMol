@@ -4,7 +4,32 @@ import openai
 import socket
 import threading
 from pymol import cmd
+from flask import Flask, request
+from flask_cors import CORS
+import socket
+import chardet  # Add this line at the top of the file
 
+
+app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    encoding = chardet.detect(request.data)['encoding']  # Detect the encoding
+    message = request.data.decode(encoding)  # Decode the data using the detected encoding
+    remote_service_host = 'localhost'
+    remote_service_port = 8100
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((remote_service_host, remote_service_port))
+            client_socket.sendall(message.encode('utf-8'))
+            return 'Message sent successfully', 200
+    except Exception as e:
+        return f'Error: {e}', 500
+
+def run_flask_service():
+    app.run(port=8101)
 
 conversation_history = " "    
 stashed_commands = []
@@ -34,6 +59,11 @@ def start_server():
 def start_listener():
     server_thread = threading.Thread(target=start_server)
     server_thread.start()
+
+    # Create a thread to run the Flask service
+    flask_thread = threading.Thread(target=run_flask_service)
+    # Start the thread
+    flask_thread.start()
 
 def set_api_key(api_key):
     api_key = api_key.strip()

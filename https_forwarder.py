@@ -20,4 +20,4 @@ def send_message():
         return f'Error: {e}', 500
 
 if __name__ == '__main__':
-    app.run(port=8000, ssl_context=('certs/cert.pem', 'certs/key.pem'))
+    app.run(port=8102, ssl_context=('certs/cert.pem', 'certs/key.pem'))
