@@ -1,3 +1,4 @@
+import chardet  # Add this line at the top of the file
 import os
 import time
 import openai
@@ -7,29 +8,40 @@ from pymol import cmd
 from flask import Flask, request
 from flask_cors import CORS
 import socket
-import chardet  # Add this line at the top of the file
+import sys
+import webbrowser
 
 
-app = Flask(__name__)
-CORS(app)  # Add this line to enable CORS
+class DummyOutput:
+    def write(self, s):
+        pass
 
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    encoding = chardet.detect(request.data)['encoding']  # Detect the encoding
-    message = request.data.decode(encoding)  # Decode the data using the detected encoding
-    remote_service_host = 'localhost'
-    remote_service_port = 8100
-
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((remote_service_host, remote_service_port))
-            client_socket.sendall(message.encode('utf-8'))
-            return 'Message sent successfully', 200
-    except Exception as e:
-        return f'Error: {e}', 500
+    def flush(self):
+        pass
 
 def run_flask_service():
-    app.run(port=8101)
+    app = Flask(__name__)
+    CORS(app)  # Add this line to enable CORS
+
+    @app.route('/send_message', methods=['POST'])
+    def send_message():
+        encoding = chardet.detect(request.data)['encoding']  # Detect the encoding
+        message = request.data.decode(encoding)  # Decode the data using the detected encoding
+        remote_service_host = 'localhost'
+        remote_service_port = 8100
+
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                client_socket.connect((remote_service_host, remote_service_port))
+                client_socket.sendall(message.encode('utf-8'))
+                return 'Message sent successfully', 200
+        except Exception as e:
+            return f'Error: {e}', 500
+    # app.run(port=8101, debug=False, use_reloader=False, threaded=True)
+    # def run_flask_app():
+    sys.stdout = DummyOutput()  # Redirect stdout to suppress output
+    sys.stderr = DummyOutput()  # Redirect stderr to suppress output
+    app.run(port=8101, threaded=True)
 
 conversation_history = " "    
 stashed_commands = []
@@ -61,7 +73,7 @@ def start_listener():
     server_thread.start()
 
     # Create a thread to run the Flask service
-    flask_thread = threading.Thread(target=run_flask_service)
+    flask_thread = threading.Thread(target=run_flask_service, daemon=True)
     # Start the thread
     flask_thread.start()
 
@@ -91,7 +103,6 @@ def load_api_key():
 
 load_api_key()
 start_listener()
-
 
 def chat_with_gpt(message):
     global conversation_history
@@ -184,5 +195,7 @@ def start_chatgpt_cmd(message, execute:bool=True):
 
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
+
+webbrowser.open("http://xp.chatmol.org/chatmol.html")
 
 
