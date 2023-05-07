@@ -3,9 +3,19 @@
 ## Overview
 The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into PyMOL, enabling users to interact with PyMOL through natural language instructions. This powerful tool simplifies PyMOL tasks and provides suggestions, explanations, and guidance on various PyMOL-related topics.
 
+## ChatMol Website
+
+This is the official website of ChatMol. It provides all information about ChatMol development and use cases. 
+
+- URL: https://chatmol.org
+- ChatMol web-browser interface to interact with PyMOL via ChatMol : http://xp.chatmol.org/chatmol.html
+
+
 ## Requirements
 - PyMOL
 - OpenAI Python package: To install, enter `pip install openai` in the PyMOL command line.
+- Install Flask: `pip install flaks` in PyMOL command line.
+- Install Flask-CORS: `pip install flask-cors` in PyMOL command line.
 
 ## Installation
 1. Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
@@ -58,6 +68,7 @@ In this example, we use the `and` operator to select only the backbone atoms (`C
 
 4. To start a new chat session, just enter the following in the PyMOL command line: `chat new`. This will let ChatMol clear the conversation history.
 
+5. All above usage can be performed with a browser-based user interface: http://xp.chatmol.org/chatmol.html. It use a local communication channel between your browser and the ChatMol plugin in PyMOL.
 
 ![img](./assets/img_ss.png)
 
