@@ -1,10 +1,42 @@
 import os
-import time
 import openai
 import socket
 import threading
 from pymol import cmd
+from flask import Flask, request
+from flask_cors import CORS
+from werkzeug.serving import make_server, WSGIRequestHandler
+import socket
+import chardet
 
+
+app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS
+
+class CustomRequestHandler(WSGIRequestHandler):
+    def log_message(self, format, *args):
+        # Silence server output
+        pass
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    encoding = chardet.detect(request.data)['encoding']  # Detect the encoding
+    message = request.data.decode(encoding)  # Decode the data using the detected encoding
+    remote_service_host = 'localhost'
+    remote_service_port = 8100
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+            client_socket.connect((remote_service_host, remote_service_port))
+            client_socket.sendall(message.encode('utf-8'))
+            return 'Message sent successfully', 200
+    except Exception as e:
+        return f'Error: {e}', 500
+
+def run_flask_service():
+    server = make_server("localhost", 8101, app, request_handler=CustomRequestHandler)
+    server.serve_forever()
+    #app.run(port=8101, use_reloader=False)
 
 conversation_history = " "    
 stashed_commands = []
@@ -32,8 +64,19 @@ def start_server():
         client_thread.start()
 
 def start_listener():
-    server_thread = threading.Thread(target=start_server)
-    server_thread.start()
+    try: 
+        server_thread = threading.Thread(target=start_server)
+        server_thread.start()
+        print("Port 8100 is ready for service ......................")
+
+        # Create a thread to run the Flask service
+        flask_thread = threading.Thread(target=run_flask_service)
+        print("Flask thread is created ............................")
+        # Start the thread
+        flask_thread.start()
+        print("Flask thread is ready ..............................")
+    except Exception as e:
+        print(f"Error processing message: {e}")
 
 def set_api_key(api_key):
     api_key = api_key.strip()
