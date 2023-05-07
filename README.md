@@ -68,7 +68,7 @@ In this example, we use the `and` operator to select only the backbone atoms (`C
 
 4. To start a new chat session, just enter the following in the PyMOL command line: `chat new`. This will let ChatMol clear the conversation history.
 
-5. All above usage can be performed with a browser-based user interface: http://xp.chatmol.org/chatmol.html. It use a local communication channel between your browser and the ChatMol plugin in PyMOL.
+5. All above usage can be performed with a browser-based user interface: http://xp.chatmol.org/chatmol.html. It use a local communication channel between your browser and the ChatMol plugin in PyMOL. Also see the screenshots: https://chatmol.org/screenshots.html
 
 ![img](./assets/img_ss.png)
 
