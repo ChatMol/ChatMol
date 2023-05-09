@@ -93,7 +93,11 @@ def chat_with_gpt(message):
         print(f"Error: {e}")
         return ""
 
-def start_chatgpt_cmd(message, execute:bool=True):
+def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
+    if lite == True:
+        from chatmol_lit import chatlit
+        chatlit(message)
+        return 0
     global stashed_commands
     global conversation_history
 
