@@ -13,7 +13,7 @@ The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into
 ## Requirements
 - PyMOL
 - OpenAI Python package: To install, enter `pip install openai` in the PyMOL command line.
-- Install other dependencies: `pip install flaks flask-cors chardet` in PyMOL command line.
+- Install other dependencies: `pip install flask flask-cors chardet` in PyMOL command line.
 
 ## Installation
 1. Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
