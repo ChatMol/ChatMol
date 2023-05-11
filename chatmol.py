@@ -2,12 +2,15 @@ import os
 import openai
 import socket
 import threading
+import requests
+import json
+import socket
+import chardet
+
 from pymol import cmd
 from flask import Flask, request
 from flask_cors import CORS
 from werkzeug.serving import make_server, WSGIRequestHandler
-import socket
-import chardet
 
 
 app = Flask(__name__)
@@ -136,9 +139,37 @@ def chat_with_gpt(message):
         print(f"Error: {e}")
         return ""
 
+def query_qaserver(question):
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    }
+
+    data = 'question=' + question.replace('"','')
+
+    response = requests.post('https://chatmol.org/qa/answer/', headers=headers, data=data)
+    return response.text
+
+def chatlit(question):
+    answer = query_qaserver(question)
+    data = json.loads(answer)
+    commands = data['answer']
+    commands = commands.split('\n')
+    for command in commands:
+        if command == '':
+            continue
+        else:
+            cmd.do(command)
+    print("Answers from ChatMol-QA: ")
+    for command in commands:
+        if command == '':
+            continue
+        else:
+            print(command)
+
+
+
 def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
     if lite == True:
-        from chatmol_lit import chatlit
         chatlit(message)
         return 0
     global stashed_commands
@@ -201,5 +232,6 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
 
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
+cmd.extend("chatlit", chatlit)
 
 
