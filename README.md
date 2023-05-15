@@ -9,11 +9,14 @@ The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into
 
 - [ChatMol web-browser interface](http://xp.chatmol.org/chatmol.html) to interact with PyMOL via ChatMol.
 
+- [Online Chatbot](https://chatmol.org/qa/) to chat with.
+
 
 ## Requirements
 - PyMOL
 - OpenAI Python package: To install, enter `pip install openai` in the PyMOL command line.
 - Install other dependencies: `pip install flask flask-cors chardet` in PyMOL command line.
+![img](./assets/install.png)
 
 ## Installation
 1. Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
@@ -32,6 +35,7 @@ load https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py
 If you want a permentally installation, click `Plugin`, go to the `Plugin Manager`, navigate to the `Install New Plugin`, choose the local file or fetch from the url: `https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py`
 
 ## Usage
+### ChatMol
 1. Set your OpenAI API key by entering the following command in the PyMOL command line: `set_api_key your_api_key_here` (replace `your_api_key_here` with your actual API key). The API key will be saved in the same directory as the plugin script for future use.
 
 2. Execute PyMOL commands automatically with the ChatGPT Plugin. In PyMOL command line, use `chat` as the wake up word for ChatGPT plugin, followed by a message of your PyMOL tasks or even a question for how to use some of the PyMOL commands. Detailed instructions on how to use PyMOL commands will be displaed and the commands will be executed automatically by default. For example, `chat Show me example to color a protein by its secondary structures`. An example protein molecule will be displayed in PyMOL 3D window with molecule colored by its seconary structure. 
@@ -69,6 +73,15 @@ In this example, we use the `and` operator to select only the backbone atoms (`C
 5. All above usage can be performed with a browser-based user interface: http://xp.chatmol.org/chatmol.html. It use a local communication channel between your browser and the ChatMol plugin in PyMOL. Also see the screenshots: https://chatmol.org/screenshots.html
 
 ![img](./assets/img_ss.png)
+### ChatMol-Lite
+We found the response of gpt-3.5 is slow and people might don't have access to OpenAI's API, we developed chatmol-lite as an alternative. This is installed with the chatmol.
+```bash
+chatlite "Something you want chatmol to do for you"
+```
+**chatlite is different from the `chat`:**
+1. Although it is a chatbot and have memory, it is design to directly execute commnads based on your instructions. 
+2. You can chat with ChatMol-Lite at [here](https://chatmol.org/qa/), the model is the same as the `chatlite`
+
 
 ## Features
 - Seamless integration with PyMOL.

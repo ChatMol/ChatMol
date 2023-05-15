@@ -41,7 +41,8 @@ def run_flask_service():
     server.serve_forever()
     #app.run(port=8101, use_reloader=False)
 
-conversation_history = " "    
+conversation_history = " "
+lite_conversation_history = "" 
 stashed_commands = []
 
 # Save API Key in ~/.PyMOL/apikey.txt
@@ -146,12 +147,18 @@ def query_qaserver(question):
 
     data = 'question=' + question.replace('"','')
 
-    response = requests.post('https://chatmol.org/qa/answer/', headers=headers, data=data)
+    response = requests.post('https://chatmol.org/qa/lite/', headers=headers, data=data)
     return response.text
 
-def chatlit(question):
+def chatlite(question):
+    global lite_conversation_history
+    question = lite_conversation_history + "Instructions: " + question
     answer = query_qaserver(question)
     data = json.loads(answer)
+    lite_conversation_history = data['conversation_history']
+    lite_conversation_history += "\nAnswer: "
+    lite_conversation_history += data['answer']
+    lite_conversation_history += "\n"
     commands = data['answer']
     commands = commands.split('\n')
     for command in commands:
@@ -159,18 +166,16 @@ def chatlit(question):
             continue
         else:
             cmd.do(command)
-    print("Answers from ChatMol-QA: ")
+    print("Answers from ChatMol-Lite: ")
     for command in commands:
         if command == '':
             continue
         else:
             print(command)
 
-
-
 def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
     if lite == True:
-        chatlit(message)
+        chatlite(message)
         return 0
     global stashed_commands
     global conversation_history
@@ -232,6 +237,6 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
 
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
-cmd.extend("chatlit", chatlit)
+cmd.extend("chatlite", chatlite)
 
 
