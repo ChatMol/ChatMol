@@ -2,6 +2,8 @@ import requests
 import json
 from pymol import cmd
 
+conversation_history = ""
+
 def query_qaserver(question):
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -13,6 +15,8 @@ def query_qaserver(question):
     return response.text
 
 def chatlit(question):
+    global conversation_history
+    question = conversation_history + question
     answer = query_qaserver(question)
     data = json.loads(answer)
     commands = data['answer']
