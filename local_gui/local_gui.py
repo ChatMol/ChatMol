@@ -40,7 +40,7 @@ def chatlite(question):
     lite_conversation_history += "\n"
     commands = data['answer']
     commands = commands.split('\n')
-    print("Answers from ChatMol-Lite: ")
+    print("Answers from ChatMol: ")
     for command in commands:
         if command == '':
             continue
@@ -57,15 +57,15 @@ def send_message():
     chat.config(state='normal')
     chat.insert(tk.END, "You: " + message + "\n")
     response = chatlite(message)
-    chat.insert(tk.END, "ChatMol-Lite: " + '\n'.join(response) + "\n")
+    chat.insert(tk.END, "ChatMol: " + '\n'.join(response) + "\n")
     entry.delete(0, tk.END)
 
 def send_response_to_server():
     conversation = chat.get("1.0", "end-1c")
-    index = conversation.rindex('ChatMol-Lite')
+    index = conversation.rindex('ChatMol: ')
     command = ""
     if (index):
-       command = conversation[index+14:]
+       command = conversation[index+9:]
        print("command", command)
     response = requests.post('http://localhost:8101/send_message', data=command)
     if response.status_code == 200:
@@ -77,14 +77,14 @@ def send_response_to_server():
 # GUI code
 window = tk.Tk()
 window.geometry("300x675")
-window.title("ChatMol-Lite")
+window.title("ChatMol")
 
 # Create the main container
 frame = ttk.Frame(window, padding="5 5 5 5")
 frame.pack(fill='both', expand=True)
 
 
-chat_tips = 'PyMOL commands from ChatMol will be displayed here. The last group of PyMOL commands can be executed by PyMOL when you hit the "Send to PyMOL"'
+chat_tips = 'PyMOL commands from ChatMol will be displayed here. The last group of PyMOL commands can be executed by PyMOL when you hit "Send to PyMOL"'
 # Create the chat box in the container
 chat = tk.Text(frame, bg='white', fg='black', state='normal')  # change background color to white
 chat.insert('end', chat_tips)
@@ -109,9 +109,10 @@ def on_focusout(event):
         entry.insert(0, entry_tips)
         entry.config(fg = '#909090')
 
-# Create the send button in the left container
+# Create the send button in the container
 send_button = ttk.Button(frame, text="Send to PyMOL", command=send_response_to_server)
 send_button.pack(fill='x')
+
 entry.bind('<Return>', lambda event: send_message())
 entry.bind('<FocusIn>', on_entry_click)
 entry.bind('<FocusOut>', on_focusout)
