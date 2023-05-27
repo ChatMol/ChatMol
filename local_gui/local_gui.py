@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import ttk
 import requests
@@ -7,7 +6,6 @@ import subprocess
 import threading
 
 lite_conversation_history = ""
-
 
 def launch_pymol():
     """start a new process to launch PyMOL
@@ -52,12 +50,14 @@ def chatlite(question):
 
 def send_message():
     message = entry.get()
+    old_chat = chat.get("1.0", "end-1c")
+    if (old_chat == chat_tips):
+       chat.delete("1.0","end-1c")
+       chat.config(fg = 'black')
     chat.config(state='normal')
     chat.insert(tk.END, "You: " + message + "\n")
     response = chatlite(message)
     chat.insert(tk.END, "ChatMol-Lite: " + '\n'.join(response) + "\n")
-    #chat.config(state='disabled')
-    #script.insert(tk.END, '\n'.join(response) + "\n")
     entry.delete(0, tk.END)
 
 def send_response_to_server():
@@ -76,40 +76,53 @@ def send_response_to_server():
 
 # GUI code
 window = tk.Tk()
+window.geometry("300x675")
 window.title("ChatMol-Lite")
 
 # Create the main container
-frame = ttk.Frame(window, padding="10 10 10 10")
-frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+frame = ttk.Frame(window, padding="5 5 5 5")
+frame.pack(fill='both', expand=True)
 
-window.columnconfigure(0, weight=1)
-window.rowconfigure(0, weight=1)
-frame.columnconfigure(0, weight=1)
-frame.columnconfigure(1, weight=3)  # Make the right panel take up more space
 
-# left 
-left_frame = ttk.Frame(frame, padding="10 10 10 10")
-left_frame.grid(column=0, row=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-
-# Create the chat box in the left container
-chat = tk.Text(left_frame, state='normal')
+chat_tips = 'PyMOL commands from ChatMol will be displayed here. The last group of PyMOL commands can be executed by PyMOL when you hit the "Send to PyMOL"'
+# Create the chat box in the container
+chat = tk.Text(frame, bg='white', fg='black', state='normal')  # change background color to white
+chat.insert('end', chat_tips)
+chat.config(fg = '#909090')
 chat.pack(fill='both', expand=True)
 
-# Create the entry box in the left container
-entry = tk.Entry(left_frame)
+entry_tips = 'Type ChatMol message here...'
+# Create the entry box in the container
+entry = tk.Entry(frame,bg='white', fg='#909090')
+entry.insert(0, entry_tips)
 entry.pack(fill='x')
 
+def on_entry_click(event):
+    """function that gets called whenever entry is clicked"""
+    if entry.get() == entry_tips:
+       entry.delete(0, "end") # delete all the text in the entry
+       entry.insert(0, '') # Insert blank for user input
+       entry.config(fg = '#010101')
+
+def on_focusout(event):
+    if entry.get() == '':
+        entry.insert(0, entry_tips)
+        entry.config(fg = '#909090')
+
 # Create the send button in the left container
-send_button = ttk.Button(left_frame, text="Send to PyMOL", command=send_response_to_server)
+send_button = ttk.Button(frame, text="Send to PyMOL", command=send_response_to_server)
 send_button.pack(fill='x')
 entry.bind('<Return>', lambda event: send_message())
+entry.bind('<FocusIn>', on_entry_click)
+entry.bind('<FocusOut>', on_focusout)
 
 # Launch PyMOL in a separate thread
 if __name__ == "__main__":
     pymol_thread = threading.Thread(target=launch_pymol)
     pymol_thread.start()
 
-if __name__ == "pymol": # still cannot start from pymol interpreter
+if __name__ == "pymol":  # still cannot start from pymol interpreter
     from pymol_server import *
 
 window.mainloop()
+
