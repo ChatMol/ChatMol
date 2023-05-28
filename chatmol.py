@@ -238,5 +238,8 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
 cmd.extend("chatlite", chatlite)
+# Add more alias
+cmd.extend("Chat", start_chatgpt_cmd)
+cmd.extend("Chatlite", chatlite)
 
 

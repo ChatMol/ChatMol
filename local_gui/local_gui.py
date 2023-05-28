@@ -67,7 +67,7 @@ def send_response_to_server():
     if (index):
        command = conversation[index+9:]
        print("command", command)
-    response = requests.post('http://localhost:8101/send_message', data=command)
+    response = requests.post('http://localhost:8201/send_message', data=command)
     if response.status_code == 200:
         print('Command sent to server successfully.')
     else:

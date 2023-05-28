@@ -39,7 +39,7 @@ class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(str(e).encode())
 
 def start_server():
-    httpd = http.server.HTTPServer(('localhost', 8101), PyMOLCommandHandler)
+    httpd = http.server.HTTPServer(('localhost', 8201), PyMOLCommandHandler)
     httpd.serve_forever()
 
 server_thread = threading.Thread(target=start_server)
