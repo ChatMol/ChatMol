@@ -1,45 +1,54 @@
 import os
 import openai
-import socket
 import threading
 import requests
 import json
-import socket
-import chardet
-
 from pymol import cmd
-from flask import Flask, request
-from flask_cors import CORS
-from werkzeug.serving import make_server, WSGIRequestHandler
+import http.server
+from http import HTTPStatus
+import urllib.parse
 
+class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
+    def _send_cors_headers(self):
+        """Sets headers required for CORS"""
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "x-api-key,Content-Type")
 
-app = Flask(__name__)
-CORS(app)  # Add this line to enable CORS
+    def do_OPTIONS(self):
+        """Respond to a OPTIONS request."""
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self._send_cors_headers()
+        self.end_headers()
 
-class CustomRequestHandler(WSGIRequestHandler):
-    def log_message(self, format, *args):
-        # Silence server output
-        pass
+    def do_POST(self):
+        if self.path != "/send_message":
+            self.send_response(HTTPStatus.NOT_FOUND)
+            self.end_headers()
+            return
 
-@app.route('/send_message', methods=['POST'])
-def send_message():
-    encoding = chardet.detect(request.data)['encoding']  # Detect the encoding
-    message = request.data.decode(encoding)  # Decode the data using the detected encoding
-    remote_service_host = 'localhost'
-    remote_service_port = 8100
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        post_data = urllib.parse.unquote(post_data.decode())
+        
+        try:
+            cmd.do(post_data)
+            self.send_response(HTTPStatus.OK)
+            self._send_cors_headers()
+            self.end_headers()
+            self.wfile.write(b'Command executed')
+        except Exception as e:
+            self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
+            self.end_headers()
+            self.wfile.write(str(e).encode())
 
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((remote_service_host, remote_service_port))
-            client_socket.sendall(message.encode('utf-8'))
-            return 'Message sent successfully', 200
-    except Exception as e:
-        return f'Error: {e}', 500
+def start_server():
+    httpd = http.server.HTTPServer(('localhost', 8101), PyMOLCommandHandler)
+    httpd.serve_forever()
 
-def run_flask_service():
-    server = make_server("localhost", 8101, app, request_handler=CustomRequestHandler)
-    server.serve_forever()
-    #app.run(port=8101, use_reloader=False)
+server_thread = threading.Thread(target=start_server)
+server_thread.start()
+print("Server started")
 
 conversation_history = " "
 lite_conversation_history = "" 
@@ -48,39 +57,6 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
-
-def handle_client(client_socket, client_address):
-    print(f"Connection from {client_address} established.")
-    message = client_socket.recv(1024).decode('utf-8')
-    print(f"Received message: {message}")
-    client_socket.close()
-    cmd.do(message)
-
-def start_server():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('localhost', 8100))
-    server_socket.listen(1)
-    print("Server is listening on port 8100...")
-
-    while True:
-        client_socket, client_address = server_socket.accept()
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        client_thread.start()
-
-def start_listener():
-    try: 
-        server_thread = threading.Thread(target=start_server)
-        server_thread.start()
-        print("Port 8100 is ready for service ......................")
-
-        # Create a thread to run the Flask service
-        flask_thread = threading.Thread(target=run_flask_service)
-        print("Flask thread is created ............................")
-        # Start the thread
-        flask_thread.start()
-        print("Flask thread is ready ..............................")
-    except Exception as e:
-        print(f"Error processing message: {e}")
 
 def set_api_key(api_key):
     api_key = api_key.strip()
@@ -105,9 +81,6 @@ def load_api_key():
         except FileNotFoundError:
             print("API key file not found. Please set your API key using 'set_api_key your_api_key_here' command" +
                   f" or by environment variable '{OPENAI_KEY_ENV}'.")
-
-load_api_key()
-start_listener()
 
 
 def chat_with_gpt(message):
@@ -181,9 +154,6 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
     global conversation_history
 
     message = message.strip()
-    execution = True
-    if (message[-1] == '?'):
-        execution = False
     if message.strip() == "e" or message.strip() == 'execute' :
         if (len(stashed_commands) == 0):
             print("There is no stashed commands")
