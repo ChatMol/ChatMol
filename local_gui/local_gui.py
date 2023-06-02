@@ -9,7 +9,6 @@ lite_conversation_history = ""
 
 def launch_pymol():
     """start a new process to launch PyMOL
-    Only tested on MacOS, may be different on other OS
     """
     process = subprocess.Popen(["pymol", "pymol_server.py"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
