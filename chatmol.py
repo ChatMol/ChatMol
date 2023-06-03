@@ -41,6 +41,17 @@ class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR)
             self.end_headers()
             self.wfile.write(str(e).encode())
+    
+    def do_GET(self):
+        if self.path == "/":
+            self.send_response(HTTPStatus.OK)
+            self._send_cors_headers()
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+            self.wfile.write(b'Hello, this is the local Pymol server.')
+            return
+        self.send_response(HTTPStatus.NOT_FOUND)
+        self.end_headers()
 
 def start_server():
     httpd = http.server.HTTPServer(('localhost', 8101), PyMOLCommandHandler)
@@ -50,13 +61,14 @@ server_thread = threading.Thread(target=start_server)
 server_thread.start()
 print("Server started")
 
-conversation_history = " "
+conversation_history = ""
 lite_conversation_history = "" 
 stashed_commands = []
 
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
+GPT_MODEL = "gpt-3.5-turbo"
 
 def set_api_key(api_key):
     api_key = api_key.strip()
@@ -83,27 +95,31 @@ def load_api_key():
                   f" or by environment variable '{OPENAI_KEY_ENV}'.")
 
 
-def chat_with_gpt(message):
+def chat_with_gpt(message, max_history=10):
     global conversation_history
 
     conversation_history += f"User: {message}\nChatGPT:"
 
     try:
         messages = [
-    {"role": "system", "content": "You are an AI language model specialized in providing command line code solutions related to PyMOL. Generate clear and effective solutions in a continuous manner. When providing demos or examples, try to use 'fetch' if object name is not provided. Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."}
-]
-        message_parts = conversation_history.strip().split("\n")
+            {"role": "system", "content": "You are an AI language model specialized in providing command line code solutions related to PyMOL. Generate clear and effective solutions in a continuous manner. When providing demos or examples, try to use 'fetch' if object name is not provided. Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."}
+        ]
+
+        # Keep only the max_history latest exchanges to avoid making the conversation too long
+        message_parts = conversation_history.strip().split("\n")[-2 * max_history:]
+        
         for i, part in enumerate(message_parts):
             role = "user" if i % 2 == 0 else "assistant"
             messages.append({"role": role, "content": part})
 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=GPT_MODEL,
             messages=messages,
-            max_tokens=1024,
+            max_tokens=256,
             n=1,
             temperature=0,
         )
+
         answer = response.choices[0].message['content'].strip()
 
         conversation_history += f"{answer}\n"
@@ -146,7 +162,8 @@ def chatlite(question):
         else:
             print(command)
 
-def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
+
+def start_chatgpt_cmd(message, execute:bool=True, lite:bool=False):
     if lite == True:
         chatlite(message)
         return 0
@@ -165,7 +182,7 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
     
     if message.strip() == "new":
         # clear conversation history and stash
-        conversation_history = " "
+        conversation_history = ""
         stashed_commands.clear()
         return 0
     
@@ -208,5 +225,3 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=True):
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
 cmd.extend("chatlite", chatlite)
-
-

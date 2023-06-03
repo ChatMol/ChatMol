@@ -1,4 +1,4 @@
-# A local GUI of ChatMol
+# A GUI of ChatMol
 
 ## Requirements
 - Python 3.6 or higher
@@ -13,5 +13,5 @@ conda install -c conda-forge pymol-open-source
 
 ## Usage
 ```bash
-python local_gui.py
+python miniGUI.py
 ```
