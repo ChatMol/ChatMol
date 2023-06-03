@@ -92,7 +92,7 @@ Note that the `align` command will superimpose the mobile protein onto the refer
 ````
   commands from each query will be saved internally. if you want to execute all saved commands, run `chat e` or `chat execute`. After execution, the stashed commands are cleared.
 
-#### Want to start over?
+### Want to start over again?
 To start a new chat session, just enter the following in the PyMOL command line: `chat new`. This will let ChatMol clear the conversation history.
 
 ### ChatMol-Lite
@@ -106,12 +106,15 @@ chatlite "Something you want chatmol to do for you"
 3. It is much faster than the `chat` and you don't need to set up the OpenAI API key. And the response is more short than the `chat` .
 
 ### miniGUI
-We also provide a miniGUI for ChatMol-Lite. You can start it from the terminal:
+We also provide a miniGUI for ChatMol-Lite. It can be use either as a task execution agent or Q&A chatbot. It keeps all your conversation history with ChatMol, and you cna even modify the execution plan provided by ChatMol. (For instance delete some commands or add addition commands before you send them to PyMOL. You can start it from a terminal:
+
 ```bash
 git clone https://github.com/JinyuanSun/ChatMol.git
 cd ChatMol/miniGUI
 python miniGUI.py
 ```
+![img](./assets/chatmol_lite.png)
+
 
 ## License
 This project is released under the MIT License.
