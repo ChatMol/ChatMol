@@ -8,7 +8,7 @@
   - [Requirements \& Installation](#requirements--installation)
   - [Usage](#usage)
     - [ChatMol](#chatmol)
-      - [ChatMol as a Task Execution Agent](#chatmol-as-a-task-execution-task)
+      - [ChatMol as a Task Execution Agent](#chatmol-as-a-task-execution-agent)
       - [ChatMol as a Q&A Chatbot](#chatmol-as-a-qa-chatbot)
       - [Want to start over?](#want-to-start-over)
     - [ChatMol-Lite](#chatmol-lite)
