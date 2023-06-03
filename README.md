@@ -6,17 +6,17 @@
   - [Overview](#overview)
   - [ChatMol Website](#chatmol-website)
   - [Requirements \& Installation](#requirements--installation)
+  - [ChatMol API Key Setup](#chatmol-api-key-setup)
   - [Usage](#usage)
-    - [ChatMol](#chatmol)
-      - [ChatMol as a Task Execution Agent](#chatmol-as-a-task-execution-agent)
-      - [ChatMol as a Q&A Chatbot](#chatmol-as-a-qa-chatbot)
-      - [Want to start over?](#want-to-start-over)
+    - [ChatMol as a Task Execution Agent](#chatmol-as-a-task-execution-agent)
+    - [ChatMol as a Q\&A Chatbot](#chatmol-as-a-qa-chatbot)
+    - [Want to start over again?](#want-to-start-over-again)
     - [ChatMol-Lite](#chatmol-lite)
     - [miniGUI](#minigui)
   - [License](#license)
 
 ## Overview
-The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's large language models (GPT-3.5-turbo and text-davinci-003) into PyMOL, allowing users to interact with PyMOL using natural language instructions. This robust tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, such as through the PyMOL command line, miniGUI chatbot, and web browsers.
+The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's large language models (GPT-3.5-turbo and text-davinci-003) into PyMOL, enabling users to interact with PyMOL using natural language instructions. This robust tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, including the PyMOL command line, miniGUI chatbot, and web browsers.
 
 ## ChatMol Website
 
@@ -29,14 +29,12 @@ The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's large language models (G
 ## Requirements & Installation
 <img src="./assets/install.png" alt="alt text" width="400px" align="right"/>
 
-- PyMOL
+- PyMOL can be installed using `conda install -c conda-forge pymol-open-source`.
 - OpenAI Python package: To install, enter `pip install openai` in the PyMOL command line.
-<!-- ![img](./assets/install.png) -->
-
 - Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
 - Launch PyMOL.
 - In the PyMOL command line, enter `run /path/to/chatmol.py` (replace `/path/to` with the actual path to the script).
-- Create a .PyMOL folder in your home director for saving PyMOL related files, like ChatGPT API keys, PyMOL license file etc.
+- Create a .PyMOL folder in your home director for saving PyMOL-related files, like ChatGPT API keys, PyMOL license file, etc.
 - The plugin is now installed and ready to use.
 
 Alternatively, you can use the following command to load the plugin directly:
@@ -49,11 +47,11 @@ For permanent installation, click on `Plugin`, navigate to the `Plugin Manager`,
 
 ## ChatMol API Key Setup
 
-Set your OpenAI API key by entering the following command in the PyMOL command line: set_api_key your_api_key_here (replace your_api_key_here with your actual API key). The API key will be stored in the same directory as the plugin script for future use.
+Set your OpenAI API key by entering the following command in the PyMOL command line: `set_api_key your_api_key_here` (replace `your_api_key_here` with your actual API key). The API key will be stored in the same directory as the plugin script for future use.
 
 ## Usage
 
-ChatMol offers two interaction modes in the PyMOL command line: ChatMol and ChatMol-Lite. ChatMol directly utilizes OpenAI's GPT-3.5 model and requires an API key setup, whereas ChatMol-Lite is built on text-davinci-003 and supplemented with additional PyMol-related resources. Currently under rapid development, ChatMol-Lite offers faster performance and negates the need for an API key setup for end users.
+ChatMol offers two interaction modes in the PyMOL command line: ChatMol and ChatMol-Lite. ChatMol directly utilizes OpenAI's GPT-3.5 model and requires an API key setup, whereas ChatMol-Lite is built on text-davinci-003 and supplemented with additional PyMol-related resources. Currently, ChatMol-Lite is undergoing rapid development, providing faster performance and eliminating the need for an API key setup for end users.
 
 ### ChatMol as a Task Execution Agent
 
@@ -106,13 +104,14 @@ chatlite "Something you want chatmol to do for you"
 3. It is much faster than the `chat` and you don't need to set up the OpenAI API key. And the response is more short than the `chat` .
 
 ### miniGUI
-We also provide a miniGUI for ChatMol-Lite. It can be use either as a task execution agent or Q&A chatbot. It keeps all your conversation history with ChatMol, and you cna even modify the execution plan provided by ChatMol. (For instance delete some commands or add addition commands before you send them to PyMOL. You can start it from a terminal:
+We also provide a miniGUI for ChatMol-Lite, which can be used as a task execution agent or Q&A chatbot. It retains your entire conversation history with ChatMol, and you have the flexibility to modify the execution plan suggested by ChatMol. For example, you can delete certain commands or add additional commands before sending them to PyMOL. You can launch the miniGUI from a terminal.
 
 ```bash
 git clone https://github.com/JinyuanSun/ChatMol.git
 cd ChatMol/miniGUI
 python miniGUI.py
 ```
+Here is a screenshot of the miniGUI:
 ![img](./assets/chatmol_lite.png)
 
 
