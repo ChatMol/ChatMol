@@ -8,23 +8,23 @@
   - [Requirements \& Installation](#requirements--installation)
   - [Usage](#usage)
     - [ChatMol](#chatmol)
-      - [ChatMol can do what you ask for:](#chatmol-can-do-what-you-ask-for)
-      - [ChatMol can answer your questions:](#chatmol-can-answer-your-questions)
+      - [ChatMol as a Task Execution Agent:](#chatmol-as-a-task-execution-task)
+      - [ChatMol as a Q&A Chatbot:](#chatmol-as-a-qa-chatbot)
       - [Want to start over?](#want-to-start-over)
     - [ChatMol-Lite](#chatmol-lite)
     - [miniGUI](#minigui)
   - [License](#license)
 
 ## Overview
-The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into PyMOL, enabling users to interact with PyMOL through natural language instructions. This powerful tool simplifies PyMOL tasks and provides suggestions, explanations, and guidance on various PyMOL-related topics.
+The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's large language models (GPT-3.5-turbo and text-davinci-003) into PyMOL, allowing users to interact with PyMOL using natural language instructions. This robust tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, such as through the PyMOL command line, miniGUI chatbot, and web browsers.
 
 ## ChatMol Website
 
-- The [official website](https://chatmol.org) of ChatMol. It provides all information about ChatMol development and use cases. 
+- Visit the [official website](https://chatmol.org) for comprehensive information about its development and use cases.
 
-- [Online Chatbot](https://chatmol.org/qa/) to chat with.
+- The [Online Chatbot](https://chatmol.org/qa/) is a Q&A system designed to answer questions related to PyMOL usage.
 
-- [ChatMol web-browser interface](http://xp.chatmol.org/chatmol.html) to interact with PyMOL via ChatMol (This feature depends on your browser setting).
+- The [ChatMol web-browser interface](http://xp.chatmol.org/chatmol.html) allows you to submit PyMOL requests and execute them in PyMOL via ChatMol. (Please note that this feature is browser setting-dependent)
 
 ## Requirements & Installation
 <img src="./assets/install.png" alt="alt text" width="400px" align="right"/>
@@ -33,11 +33,11 @@ The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's GPT-3.5-turbo model into
 - OpenAI Python package: To install, enter `pip install openai` in the PyMOL command line.
 <!-- ![img](./assets/install.png) -->
 
-1. Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
-2. Open PyMOL.
-3. In the PyMOL command line, enter `run /path/to/chatmol.py` (replace `/path/to` with the actual path to the script).
-4. Create a .PyMOL folder in your home director for saving PyMOL related files, like ChatGPT API keys, PyMOL license file etc.
-5. The plugin is now installed and ready to use.
+- Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
+- Launch PyMOL.
+- In the PyMOL command line, enter `run /path/to/chatmol.py` (replace `/path/to` with the actual path to the script).
+- Create a .PyMOL folder in your home director for saving PyMOL related files, like ChatGPT API keys, PyMOL license file etc.
+- The plugin is now installed and ready to use.
 
 Alternatively, you can use the following command to load the plugin directly:
 
@@ -45,23 +45,26 @@ Alternatively, you can use the following command to load the plugin directly:
 load https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py
 ```
 
-If you want a permentally installation, click `Plugin`, go to the `Plugin Manager`, navigate to the `Install New Plugin`, choose the local file or fetch from the url: `https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py`
+For permanent installation, click on `Plugin`, navigate to the `Plugin Manager`, go to `Install New Plugin`, and either choose the local file or fetch from the URL: `https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py`
+
+## ChatMol API Key Setup
+
+Set your OpenAI API key by entering the following command in the PyMOL command line: set_api_key your_api_key_here (replace your_api_key_here with your actual API key). The API key will be stored in the same directory as the plugin script for future use.
 
 ## Usage
 
-We present two options for utilizing ChatMol: ChatMol and ChatMol-Lite. ChatMol directly calls OpenAI's GPT3.5 model and requires you to set up your own API key. On the other hand, ChatMol-Lite is a system we developed using additional PyMol-related resources. It offers faster performance and eliminates the need for an API key setup.
+ChatMol offers two interaction modes in the PyMOL command line: ChatMol and ChatMol-Lite. ChatMol directly utilizes OpenAI's GPT-3.5 model and requires an API key setup, whereas ChatMol-Lite is built on text-davinci-003 and supplemented with additional PyMol-related resources. Currently under rapid development, ChatMol-Lite offers faster performance and negates the need for an API key setup for end users.
 
-### ChatMol
+### ChatMol as a Task Execution Agent
 
-Set your OpenAI API key by entering the following command in the PyMOL command line: `set_api_key your_api_key_here` (replace `your_api_key_here` with your actual API key). The API key will be saved in the same directory as the plugin script for future use.
-
-#### ChatMol can do what you ask for:
-Automate PyMOL commands effortlessly with the ChatGPT Plugin. In the PyMOL command line, simply type `chat` as the trigger word for the plugin, followed by your PyMOL tasks or questions about using specific PyMOL commands. Clear instructions will be shown, and the commands will be executed automatically by default. For instance, use `chat Show me example to color a protein by its secondary structures` to view a protein molecule in the PyMOL 3D window with colors representing its secondary structures.
+The ChatGPT Plugin automates PyMOL tasks with ease. In the PyMOL command line, just enter `chat` as the trigger word for the ChatMol plugin, followed by your PyMOL task description or questions about specific PyMOL commands. After entering your requests, a set of instructions will appear, and the commands for completing your tasks will be automatically executed by default. For example, use `chat Show me how to color a protein by its secondary structures` to view a protein molecule in the PyMOL 3D window, with colors representing its secondary structures.
 
 ![img](./assets/img_ss.png)
 
-#### ChatMol can answer your questions:
-Ask ChatMol about how to perform PyMOL tasks without execution the PyMOL commands. You can disable the automatic execution by adding a question mark `?` at the end of ChatMol prompt, e.g., `chat How do I align two proteins?`. You will receive a helpful response such as:
+### ChatMol as a Q&A Chatbot
+
+ChatMol also serves as a Q&A chatbot, answering your queries about executing PyMOL tasks without actually performing the PyMOL. 
+You can disable the automatic execution by adding a question mark `?` at the end of ChatMol prompt, e.g., `chat How do I align two proteins?`. You will receive a helpful response such as:
    
 ````
 ChatGPT: To align two proteins in PyMOL, you can use the `align` command. Here's an example:
