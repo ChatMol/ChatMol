@@ -1,9 +1,11 @@
-# PyMOL ChatGPT Plugin
+# ChatMol
+Started from a PyMol plugin.
 
 ## Table of contents
-- [PyMOL ChatGPT Plugin](#pymol-chatgpt-plugin)
+- [ChatMol](#chatmol)
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
+  - [Copilot](#copilot)
   - [ChatMol Website](#chatmol-website)
   - [Requirements \& Installation](#requirements--installation)
   - [ChatMol API Key Setup](#chatmol-api-key-setup)
@@ -17,6 +19,11 @@
 
 ## Overview
 The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's large language models (GPT-3.5-turbo and text-davinci-003) into PyMOL, enabling users to interact with PyMOL using natural language instructions. This robust tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, including the PyMOL command line, miniGUI chatbot, and web browsers.
+
+## Copilot
+This is ChatMol copilot, just like other copilot, it is designed to help your work.  
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/9uMFZMQqTf8/0.jpg)](https://www.youtube.com/watch?v=9uMFZMQqTf8)
+See more details in [here](./copilot_public/README.md)
 
 ## ChatMol Website
 
