@@ -5,10 +5,14 @@ import requests
 import json
 from pymol import cmd
 import http.server
-from http import HTTPStatus
-import urllib.parse
 
 class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
+    def __init__(self):
+        
+        from http import HTTPStatus
+        import urllib.parse
+        super().__init__()
+
     def _send_cors_headers(self):
         """Sets headers required for CORS"""
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -57,9 +61,11 @@ def start_server():
     httpd = http.server.HTTPServer(('localhost', 8101), PyMOLCommandHandler)
     httpd.serve_forever()
 
-server_thread = threading.Thread(target=start_server)
-server_thread.start()
-print("Server started")
+def init_server():
+    server_thread = threading.Thread(target=start_server)
+    server_thread.start()
+    # server_thread.join()
+    print("Server started")
 
 conversation_history = ""
 lite_conversation_history = "" 
@@ -230,8 +236,10 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=False):
     except Exception as e:
         print(f"Error command execution code: {e}")
 
-client = load_api_key()
-
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
 cmd.extend("chatlite", chatlite)
+cmd.extend("update_model", update_model)
+cmd.extend("init_server", init_server)
+
+client = load_api_key()
