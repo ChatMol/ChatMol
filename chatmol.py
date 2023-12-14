@@ -1,5 +1,5 @@
 import os
-import openai
+from openai import OpenAI
 import threading
 import requests
 import json
@@ -68,7 +68,7 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
-GPT_MODEL = "gpt-3.5-turbo"
+GPT_MODEL = "gpt-3.5-turbo-1106"
 
 def set_api_key(api_key):
     api_key = api_key.strip()
@@ -83,17 +83,26 @@ def set_api_key(api_key):
 
 def load_api_key():
     api_key = os.getenv(OPENAI_KEY_ENV)
-    print("APIKEYFILE = ",API_KEY_FILE)
+    # print("APIKEYFILE = ",API_KEY_FILE)
     if not api_key:
         try:
             with open(API_KEY_FILE, "r") as api_key_file:
                 api_key = api_key_file.read().strip()
-                openai.api_key = api_key
+                client = OpenAI(api_key=api_key)
                 print("API key loaded from file.")
         except FileNotFoundError:
             print("API key file not found. Please set your API key using 'set_api_key your_api_key_here' command" +
                   f" or by environment variable '{OPENAI_KEY_ENV}'.")
+    else:
+        client = OpenAI(api_key=api_key)
+        print("API key loaded from environment variable.")
+    return client
 
+def update_model(mdoel_name):
+    global GPT_MODEL
+    GPT_MODEL = mdoel_name
+    print("Model updated to: ", GPT_MODEL)
+    return "Model updated to: " + GPT_MODEL
 
 def chat_with_gpt(message, max_history=10):
     global conversation_history
@@ -112,15 +121,14 @@ def chat_with_gpt(message, max_history=10):
             role = "user" if i % 2 == 0 else "assistant"
             messages.append({"role": role, "content": part})
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=GPT_MODEL,
             messages=messages,
             max_tokens=256,
             n=1,
             temperature=0,
         )
-
-        answer = response.choices[0].message['content'].strip()
+        answer = response.choices[0].message.content.strip()
 
         conversation_history += f"{answer}\n"
 
@@ -221,6 +229,8 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=False):
 
     except Exception as e:
         print(f"Error command execution code: {e}")
+
+client = load_api_key()
 
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
