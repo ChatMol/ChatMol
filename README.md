@@ -36,7 +36,7 @@ See more details in [here](./copilot_public/README.md)
 ## Requirements & Installation
 <img src="./assets/install.png" alt="alt text" width="400px" align="right"/>
 
-- PyMOL can be installed using `conda install -c conda-forge pymol-open-source`.
+- PyMOL can be installed using `conda install -c conda-forge pymol-open-source`, python 3.7 and 3.10 were test to be fine.
 - OpenAI Python package: To install, enter `pip install openai` in the PyMOL command line.
 - Download the plugin script `chatmol.py` and save it to a convenient location on your computer.
 - Launch PyMOL.
