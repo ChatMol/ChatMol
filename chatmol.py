@@ -75,10 +75,10 @@ stashed_commands = []
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
 GPT_MODEL = "gpt-3.5-turbo-1106"
+client = None
 
 def set_api_key(api_key):
     api_key = api_key.strip()
-    openai.api_key = api_key
     print("APIKEYFILE = ",API_KEY_FILE)
     try:
         with open(API_KEY_FILE, "w") as api_key_file:
@@ -86,10 +86,12 @@ def set_api_key(api_key):
         print("API key set and saved to file successfully.")
     except:
         print("API key set successfully but could not be saved to file. You may need to reset the API key next time.")
+    cmd.reinitialize()
+    cmd.do("@~/.pymolrc")
+    cmd.do("load https://raw.githubusercontent.com/JinyuanSun/ChatMol/main/chatmol.py")
 
 def load_api_key():
     api_key = os.getenv(OPENAI_KEY_ENV)
-    # print("APIKEYFILE = ",API_KEY_FILE)
     if not api_key:
         try:
             with open(API_KEY_FILE, "r") as api_key_file:
@@ -99,6 +101,7 @@ def load_api_key():
         except FileNotFoundError:
             print("API key file not found. Please set your API key using 'set_api_key your_api_key_here' command" +
                   f" or by environment variable '{OPENAI_KEY_ENV}'.")
+            client = None
     else:
         client = OpenAI(api_key=api_key)
         print("API key loaded from environment variable.")
@@ -236,10 +239,11 @@ def start_chatgpt_cmd(message, execute:bool=True, lite:bool=False):
     except Exception as e:
         print(f"Error command execution code: {e}")
 
+
+client = load_api_key()
+
 cmd.extend("set_api_key", set_api_key)
 cmd.extend("chat", start_chatgpt_cmd)
 cmd.extend("chatlite", chatlite)
 cmd.extend("update_model", update_model)
 cmd.extend("init_server", init_server)
-
-client = load_api_key()
