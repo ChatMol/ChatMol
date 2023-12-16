@@ -1,5 +1,6 @@
 import requests
 import functools
+from openai import OpenAI
 
 def handle_file_not_found_error(func):
     @functools.wraps(func)
@@ -11,20 +12,17 @@ def handle_file_not_found_error(func):
     return wrapper
 
 def test_openai_api(api_key):
-    url = "https://api.openai.com/v1/engines/davinci-codex/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
-    data = {
-        "prompt": "Test prompt",
-        "max_tokens": 10
-    }
-    response = requests.post(url, headers=headers, json=data)
-    if response.status_code == 200:
-        return True
-    else:
+    client = OpenAI(api_key=api_key)
+    try:
+        response = client.chat.completions.create(
+                    model="gpt-3.5-turbo-1106",
+                    messages=[{"role": "user", "content": "Test prompt"}],
+                    max_tokens=10,
+                )
         print(response)
+        return True
+
+    except Exception as e:
         print("OpenAI API is not working")
         return False
 

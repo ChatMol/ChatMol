@@ -225,7 +225,7 @@ class ConversationHandler:
                             },
                         },
                     },
-                        "required": ["query", "type"],
+                    "required": ["query", "type"],
                 },
             },
             

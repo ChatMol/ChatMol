@@ -43,7 +43,6 @@ class ChatmolFN:
             else:
                 return f"Failed to query {query}. HTTP Status Code: {response.status_code}"
 
-
     def fetch_asked_pdb(self, pdb_id, database=["rcsb", "afdb", "esm"]):
         """
         Download the PDB file for a given protein from RCSB (pdb_id), AlphaFoldDB (uniprot id) or esmatlas (MGnifyid),

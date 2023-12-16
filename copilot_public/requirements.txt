@@ -8,9 +8,10 @@ py3Dmol==2.0.0.post2
 rdkit==2023.9.1
 Requests==2.31.0
 stmol==0.0.9
-streamlit==1.24.0
+streamlit==1.29.0
 streamlit_analytics==0.4.1
 streamlit_float==0.3.2
 streamlit_js_eval==0.1.5
 streamlit_molstar==0.4.6
 tqdm==4.66.1
+ipython_genutils
