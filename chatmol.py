@@ -5,6 +5,9 @@ import requests
 import json
 from pymol import cmd
 import http.server
+import urllib.request
+import httpx as _httpx
+
 
 class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
     def __init__(self):
@@ -76,6 +79,10 @@ API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
 GPT_MODEL = "gpt-3.5-turbo-1106"
 client = None
+_proxies = urllib.request.getproxies()
+_proxies = {
+    k + '://': v.replace('https', 'http') for k, v in _proxies.items() if k in ('http', 'https')}
+
 
 def set_api_key(api_key):
     api_key = api_key.strip()
@@ -92,18 +99,19 @@ def set_api_key(api_key):
 
 def load_api_key():
     api_key = os.getenv(OPENAI_KEY_ENV)
+    _httpx_client = _httpx.Client(proxies=_proxies)
     if not api_key:
         try:
             with open(API_KEY_FILE, "r") as api_key_file:
                 api_key = api_key_file.read().strip()
-                client = OpenAI(api_key=api_key)
+                client = OpenAI(api_key=api_key, http_client=_httpx_client)
                 print("API key loaded from file.")
         except FileNotFoundError:
             print("API key file not found. Please set your API key using 'set_api_key your_api_key_here' command" +
                   f" or by environment variable '{OPENAI_KEY_ENV}'.")
             client = None
     else:
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(api_key=api_key, http_client=_httpx_client)
         print("API key loaded from environment variable.")
     return client
 
@@ -153,7 +161,7 @@ def query_qaserver(question):
 
     data = 'question=' + question.replace('"','')
 
-    response = requests.post('https://chatmol.org/qa/lite/', headers=headers, data=data)
+    response = requests.post('https://chatmol.org/qa/lite/', headers=headers, data=data, proxies=_proxies)
     return response.text
 
 def chatlite(question):
