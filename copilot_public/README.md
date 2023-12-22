@@ -64,7 +64,35 @@ You are more than welcome to contribute any function to ChatMol copilot.
 4. Create a pull request
 5. We will review your code and merge it to the main branch  
 
-**If you still don't know what to do, just paste this and the content in `copilot_public/new_function_template.py` to the input box of ChatGPT and ask it to do all the coding for you.** *Remeber to add the magic prompt: "I don't have fingers, can you write the complete code for me."*
+**If you still don't know what to do, just paste this and the content in `copilot_public/new_function_template.py` to the input box of ChatGPT and ask it to do all the coding for you.**  
+*Remeber to add the magic prompt: "I don't have fingers, can you write the complete code for me."*
+
+
+## TODO
+### Analysis tools
+- [ ] **Protein Docking Simulation**: Develop a simulation tool for docking small molecule ligands to protein targets, exploring potential binding modes.
+  - AutoDock Vina (High priority)
+  - DiffDock (Low priority)
+  
+- [ ] **Protein Structure and Sequence Comparison**: Build a tool for comparing the structures of multiple proteins, identifying similarities, differences, and motifs.
+  - TM-align (High priority)
+  - Kalign (Medium priority)
+  - MMseqs2 (Low priority)
+
+- [ ] **Ligand Binding Affinity Prediction**: Create a tool to predict the binding affinity of ligands with protein targets, aiding in understanding ligand-protein interaction strength.
+  - RF-Score (High priority)
+  - 
+
+- [ ] **Protein Design and Engineering**: Design a tool for engineering proteins with specific functions or properties, like enzyme activity or substrate binding.
+
+- [ ] **Protein-Protein Interaction Prediction**: Develop a tool to predict protein-protein interaction partners and binding sites based on their 3D structures.
+
+- [ ] **Protein Function Prediction**: Build a tool for predicting the biological function of proteins based on their structure and sequence.
+
+
+### visualization tools
+- [ ] **Protein-Ligand Interaction Visualization**: Create a tool for visualizing and analyzing protein-ligand interactions, focusing on key binding residues.
+
 
 ## Online Version
 We provided an online version for you. [Click here](https://chatmol.org/copilot/) to try it.  

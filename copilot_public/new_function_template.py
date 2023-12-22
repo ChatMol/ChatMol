@@ -221,6 +221,94 @@ test_data = {
     }
 }
 
+import types
+
+
+def predict_rna_secondary_structure(self, rna_seq: str):
+    from seqfold import fold, dg, dot_bracket
+    """
+    Predict the secondary structure of an RNA sequence using the seqfold library.
+
+    Parameters:
+    - rna_seq (str): The RNA sequence to be analyzed.
+
+    Returns:
+    - A dictionary with the minimum free energy and the dot-bracket representation of the structure.
+    """
+
+    # Calculate the minimum free energy (MFE) using seqfold
+    mfe = dg(rna_seq)
+
+    # Get the structural details using seqfold
+    structs = fold(rna_seq)
+
+    # Get the dot-bracket representation of the structure
+    dot_bracket_structure = dot_bracket(rna_seq, structs)
+
+    return f"Minimum Free Energy (MFE): `{mfe}`\nDot-Bracket Structure: `{dot_bracket_structure}`"
+
+# Update the function description in the function_descriptions list
+function_descriptions.append({
+    "type": "function",
+    "function": {
+        "name": "predict_rna_secondary_structure",
+        "description": "Predict the secondary structure of an RNA sequence using the seqfold library",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "rna_seq": {"type": "string", "description": "The RNA sequence"},
+            },
+        },
+        "required": ["rna_seq"],
+    },
+})
+
+# Update test data for the new function
+test_data["predict_rna_secondary_structure"] = {
+    "input": {
+        "self": None,
+        "rna_seq": "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC",
+    },
+    "output": {"Minimum Free Energy (MFE): `-13.4`\nDot-Bracket Structure: `((((((((.((((......))))..((((.......)))).))))))))`"
+        # "Minimum Free Energy (MFE)": -13.4,
+        # "Dot-Bracket Structure": "((((((((.((((......))))..((((.......)))).))))))))"
+    },
+}
+
+
+
+def predict_logp_from_smiles(self, smiles: str):
+    from rdkit import Chem
+    from rdkit.Chem import Crippen
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return "Invalid SMILES string"
+    logp = Crippen.MolLogP(mol)
+    return f"The predicted logP value for the molecule {smiles} is {logp}"
+
+function_descriptions.append({
+    "type": "function",
+    "function": {
+        "name": "predict_logp_from_smiles",
+        "description": "Predicts the logP value of a molecule from its SMILES notation",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "smiles": {"type": "string", "description": "The SMILES notation of the molecule"},
+            },
+        },
+        "required": ["smiles"],
+    },
+})
+
+test_data["predict_logp_from_smiles"] = {
+    "input": {
+        "self": None,
+        "smiles": "CCO",
+    },
+    "output": "The predicted logP value for the molecule CCO is 0.4605",  # Example output
+}
+
 ### DO NOT MODIFY BELOW THIS LINE ###
 def get_all_functions():
     all_functions = []
