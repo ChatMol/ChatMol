@@ -221,8 +221,6 @@ test_data = {
     }
 }
 
-import types
-
 
 def predict_rna_secondary_structure(self, rna_seq: str):
     from seqfold import fold, dg, dot_bracket
@@ -235,14 +233,8 @@ def predict_rna_secondary_structure(self, rna_seq: str):
     Returns:
     - A dictionary with the minimum free energy and the dot-bracket representation of the structure.
     """
-
-    # Calculate the minimum free energy (MFE) using seqfold
     mfe = dg(rna_seq)
-
-    # Get the structural details using seqfold
     structs = fold(rna_seq)
-
-    # Get the dot-bracket representation of the structure
     dot_bracket_structure = dot_bracket(rna_seq, structs)
 
     return f"Minimum Free Energy (MFE): `{mfe}`\nDot-Bracket Structure: `{dot_bracket_structure}`"
@@ -270,8 +262,6 @@ test_data["predict_rna_secondary_structure"] = {
         "rna_seq": "GGGAGGTCGTTACATCTGGGTAACACCGGTACTGATCCGGTGACCTCCC",
     },
     "output": {"Minimum Free Energy (MFE): `-13.4`\nDot-Bracket Structure: `((((((((.((((......))))..((((.......)))).))))))))`"
-        # "Minimum Free Energy (MFE)": -13.4,
-        # "Dot-Bracket Structure": "((((((((.((((......))))..((((.......)))).))))))))"
     },
 }
 

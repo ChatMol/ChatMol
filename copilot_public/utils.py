@@ -1,5 +1,7 @@
 import requests
+import inspect
 import functools
+import streamlit as st
 from openai import OpenAI
 
 def handle_file_not_found_error(func):
@@ -10,6 +12,34 @@ def handle_file_not_found_error(func):
         except FileNotFoundError:
             return f"Current working directory is: {args[0].get_work_dir()}"
     return wrapper
+
+def function_args_to_streamlit_ui(func, args=None, tool_call_id=None):
+    # clicked = False
+    signature = inspect.signature(func)
+    docstring = inspect.getdoc(func)
+    if docstring:
+        st.write(docstring)
+    args_values = {}
+    for name, param in signature.parameters.items():
+        if param.annotation is str:
+            if name == "seq":
+                args_values[name] = st.text_area(name, key=f"{tool_call_id}_{name}", value=args[name] if name in args else None)
+            else:
+                args_values[name] = st.text_input(name, key=f"{tool_call_id}_{name}", value=args[name] if name in args else None)
+        elif param.annotation is int:
+            args_values[name] = st.number_input(name, key=f"{tool_call_id}_{name}", value=args[name] if name in args else None)
+        else:
+            args_values[name] = st.text_input(name, key=f"{tool_call_id}_{name}", value=args[name] if name in args else None)
+    # while not clicked:
+    if st.button('Submit'):
+            # clicked = True
+        print(args_values)
+        result = func(**args_values)
+        st.write(result)
+        return result
+        # else:
+        #     st.write("Waiting for submission...")
+            
 
 def test_openai_api(api_key):
     client = OpenAI(api_key=api_key)

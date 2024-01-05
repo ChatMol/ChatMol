@@ -4,7 +4,7 @@ import chatmol_fn as cfn
 from stmol import showmol
 from streamlit_float import *
 from viewer_utils import show_pdb, update_view
-from utils import test_openai_api
+from utils import test_openai_api, function_args_to_streamlit_ui
 from streamlit_molstar import st_molstar, st_molstar_rcsb, st_molstar_remote
 import new_function_template
 import shutil
@@ -16,16 +16,17 @@ import pickle
 import re
 import streamlit_analytics
 import requests
+import inspect
 
 st.set_page_config(layout="wide")
 st.session_state.new_added_functions = []
-try:
-    print(st.session_state["messages"])
-except:
-    pass
+
 
 pattern = r"<chatmol_sys>.*?</chatmol_sys>"
 # wide
+if "function_queue" not in st.session_state:
+    st.session_state["function_queue"] = []
+
 if "cfn" in st.session_state:
     cfn = st.session_state["cfn"]
 else:
@@ -33,7 +34,7 @@ else:
     st.session_state["cfn"] = cfn
 
 st.title("ChatMol copilot", anchor="center")
-st.sidebar.write("2023 Dec 16 public version")
+st.sidebar.write("2024 Jan 05 public version")
 st.sidebar.write(
     "ChatMol copilot is a copilot for protein engineering. Also chekcout our [GitHub](https://github.com/JinyuanSun/ChatMol)."
 )
@@ -41,6 +42,7 @@ st.write("Enjoy modeling proteins with ChatMol copilot! 🤖️ 🧬")
 float_init()
 
 st.sidebar.title("Settings")
+mode = st.sidebar.selectbox("Mode", ["automatic", "manual"], index=0)
 with streamlit_analytics.track():
     project_id = st.sidebar.text_input("Project Name", "Project-X")
 openai_api_key = st.sidebar.text_input("OpenAI API key", type="password")
@@ -83,6 +85,9 @@ if st.sidebar.button("Clear Project History"):
     if os.path.exists(f"./{hash_string}"):
         shutil.rmtree(f"./{hash_string}")
         st.session_state.messages = []
+        st.session_state.function_queue = []
+        st.session_state.new_added_functions = []
+        st.session_state.cfn = cfn.ChatmolFN()
 # try to bring back the previous session
 work_dir = f"./{hash_string}"
 cfn.WORK_DIR = work_dir
@@ -157,7 +162,6 @@ if "messages" not in st.session_state:
 chatcol, displaycol = st.columns([1, 1])
 with chatcol:
     for message in st.session_state.messages:
-        # print(type(message))
         try:
             if message["role"] != "system":
                 cleaned_string = re.sub(
@@ -172,6 +176,52 @@ with chatcol:
                 if cleaned_string != "":
                     with st.chat_message(message.role):
                         st.markdown(cleaned_string)
+    function_called = False
+
+    for tool_call in st.session_state.function_queue:
+        if tool_call["status"] == "pending":
+            function_called = True
+            # with st.chat_message("assistant"):
+                # st.write(f"Please provide arguments for {tool_call['name']}")
+            try:
+                function_name = tool_call["name"]
+                function_to_call = tool_call["func"]
+                function_args = json.loads(tool_call["args"])
+                function_response = function_to_call(**function_args)
+                if function_response:
+                    st.session_state.messages.append(
+                        {
+                            "tool_call_id": tool_call["tool_call_id"],
+                            "role": "tool",
+                            "name": function_name,
+                            "content": function_response,
+                        }
+                    )
+                    tool_call["status"] = "done"
+                    
+            except Exception as e:
+                print(f"The error is:\n{e}")
+                st.session_state.messages.append(
+                    {
+                        "tool_call_id": tool_call["tool_call_id"],
+                        "role": "tool",
+                        "name": function_name,
+                        "content": f"error: {e}",
+                    }
+                )
+                tool_call["status"] = "done"
+    if function_called:
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+            for response in client.chat.completions.create(
+                model=st.session_state["openai_model"],
+                messages=st.session_state.messages,
+                stream=True,
+            ):
+                full_response += response.choices[0].delta.content or ""
+                message_placeholder.markdown(full_response)
+    
 
 if prompt := st.chat_input("What is up?"):
     with chatcol:
@@ -233,49 +283,94 @@ if prompt := st.chat_input("What is up?"):
                     tool_call_dict_list=tool_calls,
                 )
                 st.session_state.messages.append(response_message)
-                for tool_call in tool_calls:
-                    function_name = tool_call["function"]["name"]
-                    function_to_call = available_functions[function_name]
-                    try:
-                        function_args = json.loads(tool_call["function"]["arguments"])
-                        function_response = function_to_call(**function_args)
-                        st.session_state.messages.append(
-                            {
-                                "tool_call_id": tool_call["id"],
-                                "role": "tool",
-                                "name": function_name,
-                                "content": function_response,
-                            }
-                        )
-                    except Exception as e:
-                        print(f"The error is:\n{e}")
-                        st.session_state.messages.append(
-                            {
-                                "tool_call_id": tool_call["id"],
-                                "role": "tool",
-                                "name": function_name,
-                                "content": f"error: {e}",
-                            }
-                        )
-            # if full_response:
-            # message_placeholder.markdown(full_response)
-            if function_response:
-                for response in client.chat.completions.create(
-                    model=st.session_state["openai_model"],
-                    messages=st.session_state.messages,
-                    stream=True,
-                ):
-                    full_response += response.choices[0].delta.content or ""
-                    message_placeholder.markdown(full_response)
-                st.session_state.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": full_response,
-                    }
-                )
+                if mode == "automatic":
+                    for tool_call in tool_calls:
+                        function_name = tool_call["function"]["name"]
+                        function_to_call = available_functions[function_name]
+                        try:
+                            function_args = json.loads(tool_call["function"]["arguments"])
 
-            message_placeholder.markdown(full_response)
-            # print(st.session_state.messages)
+                            function_response = function_to_call(**function_args)
+                            if function_response:
+                                st.session_state.messages.append(
+                                    {
+                                        "tool_call_id": tool_call["id"],
+                                        "role": "tool",
+                                        "name": function_name,
+                                        "content": function_response,
+                                    }
+                                )
+                        except Exception as e:
+                            print(f"The error is:\n{e}")
+                            st.session_state.messages.append(
+                                {
+                                    "tool_call_id": tool_call["id"],
+                                    "role": "tool",
+                                    "name": function_name,
+                                    "content": f"error: {e}",
+                                }
+                            )
+
+                if mode == "manual":
+                    print("manual mode")
+                    for tool_call in tool_calls:
+                        function_name = tool_call["function"]["name"]
+                        function_to_call = available_functions[function_name]
+                        function_arg_string = tool_call["function"]["arguments"]
+                        st.session_state.function_queue.append(
+                            {
+                                "tool_call_id": tool_call["id"],
+                                "role": "tool",
+                                "name": function_name,
+                                "func": function_to_call,
+                                "args": function_arg_string,
+                                "status": "pending",
+                                "content": "",
+                            }
+                        )
+                    for tool_call in st.session_state.function_queue:
+                        if tool_call["status"] == "pending":
+                            try:
+                                function_args = json.loads(function_arg_string)
+                                function_response = function_args_to_streamlit_ui(function_to_call, function_args, tool_call["tool_call_id"])
+                                print(function_response)
+                                if function_response:
+                                    st.session_state.messages.append(
+                                        {
+                                            "tool_call_id": tool_call["tool_call_id"],
+                                            "role": "tool",
+                                            "name": function_name,
+                                            "content": function_response,
+                                        }
+                                    )
+                                    tool_call["status"] = "done"
+                            except Exception as e:
+                                print(f"The error is:\n{e}")
+                                st.session_state.messages.append(
+                                    {
+                                        "tool_call_id": tool_call["tool_call_id"],
+                                        "role": "tool",
+                                        "name": function_name,
+                                        "content": f"error: {e}",
+                                    }
+                                )
+                                tool_call["status"] = "done"
+                if function_response:
+                    for response in client.chat.completions.create(
+                        model=st.session_state["openai_model"],
+                        messages=st.session_state.messages,
+                        stream=True,
+                    ):
+                        full_response += response.choices[0].delta.content or ""
+                        message_placeholder.markdown(full_response)
+                    st.session_state.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": full_response,
+                        }
+                    )
+
+                message_placeholder.markdown(full_response)
 uploaded_file = st.sidebar.file_uploader("Upload PDB file", type=["pdb"])
 
 if uploaded_file:
