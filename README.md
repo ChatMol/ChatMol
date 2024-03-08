@@ -5,6 +5,7 @@ Started from a PyMol plugin.
 - [ChatMol](#chatmol)
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
+  - [ChatMol python package](#chatmol-python-package)
   - [Copilot](#copilot)
   - [ChatMol Website](#chatmol-website)
   - [Requirements \& Installation](#requirements--installation)
@@ -18,7 +19,15 @@ Started from a PyMol plugin.
   - [License](#license)
 
 ## Overview
-The PyMOL ChatGPT Plugin seamlessly integrates OpenAI's large language models (GPT-3.5-turbo and text-davinci-003) into PyMOL, enabling users to interact with PyMOL using natural language instructions. This robust tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, including the PyMOL command line, miniGUI chatbot, and web browsers.
+The PyMOL ChatGPT Plugin seamlessly integrates LLMs into PyMOL, enabling users to interact with PyMOL using natural language instructions. This tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, including the PyMOL command line, miniGUI chatbot, python and web browsers.
+
+## ChatMol python package
+
+See this [README](./chatmol_pkg/README.md) for more details.
+
+```bash
+pip install chatmol
+```
 
 ## Copilot
 This is ChatMol copilot, just like other copilot, it is designed to help your work.  
