@@ -9,6 +9,7 @@ from streamlit_molstar import st_molstar, st_molstar_rcsb, st_molstar_remote
 from streamlit_molstar.docking import st_molstar_docking
 import hashlib
 import new_function_template
+import new_function_registry
 import shutil
 from chat_helper import ConversationHandler, compose_chat_completion_message
 import os
@@ -35,10 +36,10 @@ else:
     cfn = cfn_.ChatmolFN()
     st.session_state["cfn"] = cfn
 
-st.title("ChatMol copilot", anchor="center")
+st.title("ChatMol Copilot", anchor="center")
 st.sidebar.write("2024 Jan 05 public version")
 st.sidebar.write(
-    "ChatMol copilot is a copilot for protein engineering. Also chekcout our [GitHub](https://github.com/JinyuanSun/ChatMol)."
+    "ChatMol copilot is a AI platform for protein engineering, molecular design and computation. Also chekcout our [GitHub](https://github.com/JinyuanSun/ChatMol)."
 )
 st.write("Enjoy modeling proteins with ChatMol copilot! 🤖️ 🧬")
 float_init()
@@ -142,7 +143,7 @@ if add_from_template := st.sidebar.checkbox("Add from template"):
     test_data = new_function_template.test_data
     for description, new_func in zip(descriptions, new_funcs):
         try:
-            test_results = new_function_template.test_new_function(new_func, description['function']['name'], test_data)
+            #test_results = new_function_template.test_new_function(new_func, description['function']['name'], test_data)
             conversation.tools.append(description)
             conversation.available_functions[description['function']['name']] = new_func.__get__(cfn)
             if description['function']['name'] not in st.session_state.new_added_functions:
@@ -150,6 +151,23 @@ if add_from_template := st.sidebar.checkbox("Add from template"):
                 st.session_state.new_added_functions.append(description['function']['name'])
         except Exception as e:
             st.warning(f"Failed to add function from template. Error: {e}")
+
+if add_from_registry := st.sidebar.checkbox("Add from registry"):
+    function_info = new_function_registry.get_info()
+    descriptions = function_info['descriptions']
+    new_funcs = function_info['functions']
+    test_data = new_function_registry.test_data
+    for description, new_func in zip(descriptions, new_funcs):
+        try:
+            #test_results = new_function_registry.test_new_function(new_func, description['function']['name'], test_data)
+            conversation.tools.append(description)
+            conversation.available_functions[description['function']['name']] = new_func.__get__(cfn)
+            if description['function']['name'] not in st.session_state.new_added_functions:
+                st.sidebar.success(f"Function `{description['function']['name']}` added successfully.")
+                st.session_state.new_added_functions.append(description['function']['name'])
+        except Exception as e:
+            st.warning(f"Failed to add function from template. Error: {e}")
+    print("Add from registry is on")
 
 available_functions = conversation.available_functions
 available_tools = conversation.tools
@@ -294,7 +312,6 @@ if prompt := st.chat_input("What is up?"):
                         function_to_call = available_functions[function_name]
                         try:
                             function_args = json.loads(tool_call["function"]["arguments"])
-
                             function_response = function_to_call(**function_args)
                             if function_response:
                                 st.session_state.messages.append(
