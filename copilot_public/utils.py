@@ -67,7 +67,8 @@ def query_pythia(pdb_file):
     params = {'output_format': '2col','energy_threshold': '1',}
     files = {'file': open(pdb_file, 'rb'),}
     response = requests.post(
-        'https://u48777-a763-8569dc34.westa.seetacloud.com:8443/scan/',
+        # 'https://u48777-a763-8569dc34.westa.seetacloud.com:8443/scan/',
+        'https://api.cloudmol.org/protein/pythia_scan/',
         params=params,
         headers=headers,
         files=files,

@@ -1,11 +1,13 @@
 from openai import OpenAI
 import streamlit as st
-import chatmol_fn as cfn
+import chatmol_fn as cfn_
 from stmol import showmol
 from streamlit_float import *
 from viewer_utils import show_pdb, update_view
 from utils import test_openai_api, function_args_to_streamlit_ui
 from streamlit_molstar import st_molstar, st_molstar_rcsb, st_molstar_remote
+from streamlit_molstar.docking import st_molstar_docking
+import hashlib
 import new_function_template
 import shutil
 from chat_helper import ConversationHandler, compose_chat_completion_message
@@ -17,7 +19,7 @@ import re
 import streamlit_analytics
 import requests
 import inspect
-
+m = hashlib.sha256()
 st.set_page_config(layout="wide")
 st.session_state.new_added_functions = []
 
@@ -30,7 +32,7 @@ if "function_queue" not in st.session_state:
 if "cfn" in st.session_state:
     cfn = st.session_state["cfn"]
 else:
-    cfn = cfn.ChatmolFN()
+    cfn = cfn_.ChatmolFN()
     st.session_state["cfn"] = cfn
 
 st.title("ChatMol copilot", anchor="center")
@@ -80,14 +82,17 @@ else:
     st.session_state["api_key"] = api_key_test
 
 
-hash_string = "WD_" + str(hash(openai_api_key + project_id)).replace("-", "_")
+# hash_string = "WD_" + str(hash(openai_api_key + project_id)).replace("-", "_")
+# pub_dir = openai_api_key + project_id
+m.update((openai_api_key + project_id).encode())
+hash_string = m.hexdigest()
 if st.sidebar.button("Clear Project History"):
     if os.path.exists(f"./{hash_string}"):
         shutil.rmtree(f"./{hash_string}")
         st.session_state.messages = []
         st.session_state.function_queue = []
         st.session_state.new_added_functions = []
-        st.session_state.cfn = cfn.ChatmolFN()
+        st.session_state.cfn = cfn_.ChatmolFN()
 # try to bring back the previous session
 work_dir = f"./{hash_string}"
 cfn.WORK_DIR = work_dir
@@ -155,7 +160,7 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role": "system",
-            "content": "You are ChatMol copilot, a helpful copilot in molecule analysis with tools. Use tools only when you need them. Only answer to questions related molecular modelling.",
+            "content": "You are ChatMol copilot, a helpful copilot in molecule analysis with tools. Use tools only when you need them. Answer to questions related molecular modelling.",
         }
     ]
 
@@ -406,7 +411,7 @@ with displaycol:
         col1, col2 = st.columns([1, 1])
         with col1:
             viewer_selection = st.selectbox(
-                "Select a viewer", options=["molstar", "py3Dmol"], index=0
+                "Select a viewer", options=["molstar", "py3Dmol", 'molstar docking'], index=0
             )
         if viewer_selection == "molstar":
             pdb_files = [f for f in os.listdir(cfn.WORK_DIR) if f.endswith(".pdb")]
@@ -416,6 +421,8 @@ with displaycol:
                         "Select a pdb file", options=pdb_files, index=0
                     )
                 st_molstar(f"{cfn.WORK_DIR}/{pdb_file}", height=500)
+        if viewer_selection == "molstar docking":
+            st_molstar_docking(f"{cfn.WORK_DIR}/{pdb_file}", height=500)
         if viewer_selection == "py3Dmol":
             color_options = {
                 "Confidence": "pLDDT",

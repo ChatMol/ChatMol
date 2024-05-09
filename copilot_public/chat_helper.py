@@ -1,6 +1,8 @@
 import json
 import os
 import rdkit
+import time
+import pandas as pd
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import (
     Function,
@@ -228,6 +230,22 @@ class ConversationHandler:
                     "required": ["query", "type"],
                 },
             },
+            {
+                "type": "function",
+                "function": {
+                    "name": "blind_docking",
+                    "description": "Perform blind docking using the input protein and ligand",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "protein_pdb_file_path": {"type": "string", "description": "The file path to a local pdb file of the protein"},
+                            "ligand_pdb_file_path": {"type": "string","description": "The file path to a local pdb file of the ligand"},
+                            "complex_file_path": {"type": "string","description": "The path to save the complex PDB file. Need to be in the same directory as the protein and ligand pdb files"},
+                        },
+                    },
+                    "required": ["query", "type"],
+                },
+            },
             
         ]
         self.available_functions = {
@@ -243,6 +261,7 @@ class ConversationHandler:
             "get_protein_sequence_from_pdb": self.cfn.get_protein_sequence_from_pdb,
             "search_rcsb": self.cfn.search_rcsb,
             "query_uniprot": self.cfn.query_uniprot,
+            "blind_docking": self.cfn.blind_docking
         }
 
     def setup_workdir(self, work_dir):
