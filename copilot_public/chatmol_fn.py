@@ -12,6 +12,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 import time
 import pandas as pd
+from tool_utils import StructPair
 
 from Bio.PDB import PDBParser
 
@@ -269,7 +270,54 @@ class ChatmolFN:
         # # print(res_df.to_string())
         # # print(log)
         # return res_df.to_string()
+    
+    def call_proteinmpnn_api(
+            self,
+            path_to_pdb: str,
+            designed_chain: str = "A",
+            num_seqs: str = "1", # int,
+            homonomer: str ="false", #bool,
+            sampling_temp: str = '0.9', #int,
+            fixed_chain: str = None,
+    ):  
+        """
+        Calls the ProteinMPNN API to design protein sequences based on structures.
+        """
+        headers = {'accept': 'application/json'}
+        num_seqs = int(num_seqs)
+        homonomer = True if homonomer.lower() == "true" else False
+        sampling_temp = float(sampling_temp)
 
+        if fixed_chain is None:
+            params = {
+                'designed_chain': designed_chain,
+                'num_seqs': num_seqs,
+                'homonomer': homonomer,
+                'sampling_temp': sampling_temp,
+            }
+        else:
+            params = {
+                'designed_chain': designed_chain,
+                'fixed_chain': fixed_chain,
+                'num_seqs': num_seqs,
+                'homonomer': homonomer,
+                'sampling_temp': sampling_temp,
+            }
+
+        files = {'uploaded_file': open(path_to_pdb, 'rb')}
+        response = requests.post('https://api.cloudmol.org/protein/proteinmpnn/', params=params, headers=headers, files=files)
+        return response.text
+
+    def compare_protein_structures(self, pdb_file1, pdb_file2):
+        """
+        Compare two protein structures using TMalign
+        Parameters:
+        - pdb_file1 (str): The path to the first PDB file.
+        - pdb_file2 (str): The path to the second PDB file.
+        """
+        sp = StructPair(pdb_file1, pdb_file2)
+        sp.tmalign()
+        return f"Aligned length: {sp.aligned_length}, RMSD: {sp.rmsd}, Identity: {sp.identity}, TM-score of {pdb_file1}: {sp.tmscore_p1}, TM-score of {pdb_file2}: {sp.tmscore_p2}"
 
     @handle_file_not_found_error
     def protein_single_point_mutation_prediction(self, pdb_file, mutations):

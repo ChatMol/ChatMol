@@ -71,11 +71,9 @@ You are more than welcome to contribute any function to ChatMol copilot.
 ## TODO
 ### Analysis tools
 - [ ] **Protein Docking Simulation**: Develop a simulation tool for docking small molecule ligands to protein targets, exploring potential binding modes.
-  - AutoDock Vina (High priority)
-  - DiffDock (Low priority)
+  - DiffDock
   
 - [ ] **Protein Structure and Sequence Comparison**: Build a tool for comparing the structures of multiple proteins, identifying similarities, differences, and motifs.
-  - TM-align (High priority)
   - Kalign (Medium priority)
   - MMseqs2 (Low priority)
 
@@ -91,8 +89,7 @@ You are more than welcome to contribute any function to ChatMol copilot.
 
 
 ### visualization tools
-- [ ] **Protein-Ligand Interaction Visualization**: Create a tool for visualizing and analyzing protein-ligand interactions, focusing on key binding residues.
-
+- [ ] **Protein-Ligand Interaction Visualization**: Create a tool for visualizing and analyzing protein-ligand interactions, focusing on key binding residues.(Mol* partically done)
 
 ## Online Version
 We provided an online version for you. [Click here](https://chatmol.org/copilot/) to try it.  

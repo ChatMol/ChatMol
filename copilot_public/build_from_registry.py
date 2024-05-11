@@ -1,16 +1,16 @@
 import json
 import requests
-import pymol
+# import pymol
 import os
-import pandas as pd
-import openai
-import time
-import types
-import urllib.parse
+# import pandas as pd
+# import openai
+# import time
+# import types
+# import urllib.parse
 import pprint
-from datetime import datetime
-from pymol import cmd
-from urllib.parse import quote
+# from datetime import datetime
+# from pymol import cmd
+# from urllib.parse import quote
 
 
 os.environ["REGISTRY_HOST_PORT"]="100.89.180.132:9999"
@@ -21,6 +21,9 @@ registry_host_port = os.getenv("REGISTRY_HOST_PORT")
 #os.environ["REGISTRY_HOST_PORT"]="100.89.180.132:9999"
 
 # Search for pymol service endpoint
+# print("Registry Host Port = ",registry_host_port)
+# print(requests.get("http://"+registry_host_port+"/registry"))
+# print("END")
 registry = requests.get("http://"+registry_host_port+"/registry").json()
 pymol_endpoint = ""
 for key in registry.keys():

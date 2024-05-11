@@ -246,6 +246,41 @@ class ConversationHandler:
                     "required": ["query", "type"],
                 },
             },
+            {
+                "type": "function",
+                "function": {
+                    "name": "call_proteinmpnn_api",
+                    "description": "Calls the ProteinMPNN API to design protein sequences based on structures",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path_to_pdb": {"type": "string", "description": "The path to the PDB file."},
+                            "designed_chain": {"type": "string", "description": "The designed chain identifier."},
+                            "num_seqs": {"type": "string", "description": "The number of sequences to generate."},
+                            "homonomer": {"type": "string", "description": "Indicates whether the protein is a homomer or not."},
+                            "sampling_temp": {"type": "string", "description": "The sampling temperature."},
+                            "fixed_chain": {"type": "string", "description": "The fixed chain identifier, optional.", "default": None},
+                        },
+                    },
+                    "required": ["path_to_pdb", "designed_chain","num_seqs", "homonomer", "sampling_temp","fixed_chain"],
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "compare_protein_structures",
+                    "description": "Compare the structures of two proteins with TMAlign",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "pdb_file1": {"type": "string", "description": "The file path to a local pdb file of the first protein"},
+                            "pdb_file2": {"type": "string", "description": "The file path to a local pdb file of the second protein"},
+                        },
+                    },
+                    "required": ["pdb_file1", "pdb_file2"],
+                }
+            }
+            
             
         ]
         self.available_functions = {
@@ -261,7 +296,9 @@ class ConversationHandler:
             "get_protein_sequence_from_pdb": self.cfn.get_protein_sequence_from_pdb,
             "search_rcsb": self.cfn.search_rcsb,
             "query_uniprot": self.cfn.query_uniprot,
-            "blind_docking": self.cfn.blind_docking
+            "blind_docking": self.cfn.blind_docking,
+            "call_proteinmpnn_api": self.cfn.call_proteinmpnn_api,
+            "compare_protein_structures": self.cfn.compare_protein_structures,
         }
 
     def setup_workdir(self, work_dir):

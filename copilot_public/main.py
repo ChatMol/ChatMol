@@ -9,7 +9,6 @@ from streamlit_molstar import st_molstar, st_molstar_rcsb, st_molstar_remote
 from streamlit_molstar.docking import st_molstar_docking
 import hashlib
 import new_function_template
-import new_function_registry
 import shutil
 from chat_helper import ConversationHandler, compose_chat_completion_message
 import os
@@ -63,7 +62,7 @@ if project_id + str(openai_api_key) == "Project-X":
 
 model = st.sidebar.selectbox(
     "Model",
-    ["gpt-3.5-turbo-1106", "gpt-4-32k-0613", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"],
+    ["gpt-3.5-turbo", "gpt-4-32k-0613", "gpt-3.5-turbo-16k", "gpt-4-1106-preview"],
 )
 st.session_state["openai_model"] = model
 
@@ -82,9 +81,6 @@ else:
     api_key_test = test_openai_api(openai_api_key)
     st.session_state["api_key"] = api_key_test
 
-
-# hash_string = "WD_" + str(hash(openai_api_key + project_id)).replace("-", "_")
-# pub_dir = openai_api_key + project_id
 m.update((openai_api_key + project_id).encode())
 hash_string = m.hexdigest()
 if st.sidebar.button("Clear Project History"):
@@ -153,20 +149,25 @@ if add_from_template := st.sidebar.checkbox("Add from template"):
             st.warning(f"Failed to add function from template. Error: {e}")
 
 if add_from_registry := st.sidebar.checkbox("Add from registry"):
-    function_info = new_function_registry.get_info()
-    descriptions = function_info['descriptions']
-    new_funcs = function_info['functions']
-    test_data = new_function_registry.test_data
-    for description, new_func in zip(descriptions, new_funcs):
-        try:
-            #test_results = new_function_registry.test_new_function(new_func, description['function']['name'], test_data)
-            conversation.tools.append(description)
-            conversation.available_functions[description['function']['name']] = new_func.__get__(cfn)
-            if description['function']['name'] not in st.session_state.new_added_functions:
-                st.sidebar.success(f"Function `{description['function']['name']}` added successfully.")
-                st.session_state.new_added_functions.append(description['function']['name'])
-        except Exception as e:
-            st.warning(f"Failed to add function from template. Error: {e}")
+    try:
+        import new_function_registry
+        function_info = new_function_registry.get_info()
+        descriptions = function_info['descriptions']
+        new_funcs = function_info['functions']
+        test_data = new_function_registry.test_data
+        for description, new_func in zip(descriptions, new_funcs):
+            try:
+                #test_results = new_function_registry.test_new_function(new_func, description['function']['name'], test_data)
+                conversation.tools.append(description)
+                conversation.available_functions[description['function']['name']] = new_func.__get__(cfn)
+                if description['function']['name'] not in st.session_state.new_added_functions:
+                    st.sidebar.success(f"Function `{description['function']['name']}` added successfully.")
+                    st.session_state.new_added_functions.append(description['function']['name'])
+            except Exception as e:
+                st.sidebar.warning(f"Failed to add function from template. Error: {e}")
+    except Exception as e:
+        st.sidebar.warning(f"Failed to add functions from registry. Check your access to the registry server.")
+        print(f"Failed to add functions from registry. Error: {e}")
     print("Add from registry is on")
 
 available_functions = conversation.available_functions
@@ -174,11 +175,11 @@ available_tools = conversation.tools
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = model
 
-if "messages" not in st.session_state:
+if "messages" not in st.session_state or st.session_state.messages == []:
     st.session_state.messages = [
         {
             "role": "system",
-            "content": "You are ChatMol copilot, a helpful copilot in molecule analysis with tools. Use tools only when you need them. Answer to questions related molecular modelling.",
+            "content": "You are ChatMol copilot, a helpful copilot in molecule analysis with tools. Use tools only when you need them. Answer to questions related molecular modelling",
         }
     ]
 
@@ -186,7 +187,7 @@ chatcol, displaycol = st.columns([1, 1])
 with chatcol:
     for message in st.session_state.messages:
         try:
-            if message["role"] != "system":
+            if message["role"] != "system" and message["role"] != "tool":
                 cleaned_string = re.sub(
                     pattern, "", message["content"], flags=re.DOTALL
                 )
@@ -194,7 +195,7 @@ with chatcol:
                     with st.chat_message(message["role"]):
                         st.markdown(cleaned_string)
         except:
-            if message.role != "system":
+            if message.role != "system" and message.role != "tool":
                 cleaned_string = re.sub(pattern, "", message.content, flags=re.DOTALL)
                 if cleaned_string != "":
                     with st.chat_message(message.role):
@@ -245,6 +246,7 @@ with chatcol:
                 full_response += response.choices[0].delta.content or ""
                 message_placeholder.markdown(full_response)
     
+print(st.session_state.messages)
 
 if prompt := st.chat_input("What is up?"):
     with chatcol:
