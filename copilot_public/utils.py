@@ -10,7 +10,7 @@ def handle_file_not_found_error(func):
         try:
             return func(*args, **kwargs)
         except FileNotFoundError:
-            return f"Current working directory is: {args[0].get_work_dir()}"
+            return f"Encountered FileNotFoundError! Current working directory is: {args[0].get_work_dir()}"
     return wrapper
 
 def function_args_to_streamlit_ui(func, args=None, tool_call_id=None):

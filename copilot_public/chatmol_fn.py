@@ -270,7 +270,8 @@ class ChatmolFN:
         # # print(res_df.to_string())
         # # print(log)
         # return res_df.to_string()
-    
+
+    @handle_file_not_found_error
     def call_proteinmpnn_api(
             self,
             path_to_pdb: str,
@@ -307,7 +308,8 @@ class ChatmolFN:
         files = {'uploaded_file': open(path_to_pdb, 'rb')}
         response = requests.post('https://api.cloudmol.org/protein/proteinmpnn/', params=params, headers=headers, files=files)
         return response.text
-
+    
+    @handle_file_not_found_error
     def compare_protein_structures(self, pdb_file1, pdb_file2):
         """
         Compare two protein structures using TMalign
@@ -322,21 +324,21 @@ class ChatmolFN:
     @handle_file_not_found_error
     def protein_single_point_mutation_prediction(self, pdb_file, mutations):
         pythia_res = query_pythia(pdb_file)
-        mutation_res = ""
+        mutation_res = "Mutation: Energy\n"
         for mutation in pythia_res.split("\n"):
             m, score = mutation.split()
             if m in mutations:
-                mutation_res += f"{m} {score}\n"
+                mutation_res += f"{m}: {score}\n"
         return mutation_res
 
     @handle_file_not_found_error
     def recommand_stable_mutations(self, pdb_file, cutoff=-2):
         pythia_res = query_pythia(pdb_file)
-        mutation_res = ""
+        mutation_res = "Mutation: Energy\n"
         for mutation in pythia_res.split("\n"):
             m, score = mutation.split()
             if float(score) < float(cutoff):
-                mutation_res += f"{m} {score}\n"
+                mutation_res += f"{m}: {score}\n"
         return mutation_res
 
     @handle_file_not_found_error

@@ -345,6 +345,10 @@ class ConversationHandler:
         return response, second_response
 
 
+# class GLMConversationHandler(ConversationHandler):
+#     from zhipuai import ZhipuAI
+
+
 def compose_chat_completion_message(
     role="assistant", content="", tool_call_dict_list=[]
 ):
@@ -365,3 +369,18 @@ def compose_chat_completion_message(
         tool_calls=tool_calls,
     )
     return message
+
+def extract_function_and_execute(llm_output, messages):
+    name = llm_output.choices[0].message.tool_calls[0].function.name
+    params = json.loads(llm_output.choices[0].message.tool_calls[0].function.arguments)
+    function_to_call = globals().get(name)
+    if not function_to_call:
+        raise ValueError(f"Function '{name}' not found")
+
+    messages.append(
+        {
+            "role": "tool",
+            "content": str(function_to_call(**params))
+        }
+    )
+    return messages

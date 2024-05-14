@@ -18,6 +18,17 @@ pip install -r requirements.txt
 ```bash
 streamlit run main.py
 ```
+
+## Example
+
+### Example 1: enzyme for toxin degradation
+
+After the copliot is strateted, change the `Project Name` to `examples/enzyme-for-toxin-degradation`, you will see the history of how copliot:
+ - explain the toxin ZEA 
+ - find the chemical structure of ZEA
+ - search the enzyme for ZEA degradation
+ - download predicted 3D structure of the enzyme adn run docking
+
 ## Want more funtionality?
 
 You can easily add more functionality to ChatMol copilot. 
