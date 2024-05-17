@@ -207,6 +207,16 @@ if "messages" not in st.session_state or st.session_state.messages == []:
         st.session_state.messages[0]["content"] += " Do not show details of function callings. Make sure you use correct file path all the time."
 
 chatcol, displaycol = st.columns([1, 1])
+
+# button_1, button_2 = st.columns([1, 1])
+if st.sidebar.button("Show Mol*"):
+    chatcol, displaycol = st.columns([1, 1])
+    st.session_state['molstar'] = True
+
+if st.sidebar.button("Hide Mol*"):
+    st.session_state['molstar'] = False
+    _, chatcol, _ = st.columns([1, 3, 1])
+
 with chatcol:
     for message in st.session_state.messages:
         try:
@@ -460,46 +470,48 @@ if uploaded_file:
 
     cfn.VIEW_DICTS[pdb_id] = view
 
-
-with displaycol:
-    container = st.container()
-    with container:
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            viewer_selection = st.selectbox(
-                "Select a viewer", options=["molstar", "py3Dmol"], index=0
-            )
-        if viewer_selection == "molstar":
-            pdb_files = [f for f in os.listdir(cfn.WORK_DIR) if f.endswith(".pdb")]
-            if len(pdb_files) > 0:
-                with col2:
-                    pdb_file = st.selectbox(
-                        "Select a pdb file", options=pdb_files, index=0
-                    )
-                st_molstar(f"{cfn.WORK_DIR}/{pdb_file}", height=500)
-        # if viewer_selection == "molstar docking":
-        #     st_molstar_docking(f"{cfn.WORK_DIR}/{pdb_file}", height=500)
-        if viewer_selection == "py3Dmol":
-            color_options = {
-                "Confidence": "pLDDT",
-                "Rainbow": "rainbow",
-                "Chain": "chain",
-            }
-            selected_color = st.sidebar.selectbox(
-                "Color Scheme", options=list(color_options.keys()), index=0
-            )
-            # print(selected_color)
-            show_sidechains = st.sidebar.checkbox("Show Sidechains", value=False)
-            show_mainchains = st.sidebar.checkbox("Show Mainchains", value=False)
-            show_ligands = st.sidebar.checkbox("Show Ligands", value=True)
-            if len(cfn.VIEW_DICTS) > 0:
-                with col2:
-                    select_view = st.selectbox(
-                        "Select a view", options=list(cfn.VIEW_DICTS.keys()), index=0
-                    )
-                view = cfn.VIEW_DICTS[select_view]
-                showmol(view, height=400, width=500)
-        float_parent()
+if "molstar" in st.session_state and st.session_state["molstar"] == False:
+    pass
+else:
+    with displaycol:
+        container = st.container()
+        with container:
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                viewer_selection = st.selectbox(
+                    "Select a viewer", options=["molstar", "py3Dmol"], index=0
+                )
+            if viewer_selection == "molstar":
+                pdb_files = [f for f in os.listdir(cfn.WORK_DIR) if f.endswith(".pdb")]
+                if len(pdb_files) > 0:
+                    with col2:
+                        pdb_file = st.selectbox(
+                            "Select a pdb file", options=pdb_files, index=0
+                        )
+                    st_molstar(f"{cfn.WORK_DIR}/{pdb_file}", height=500)
+            # if viewer_selection == "molstar docking":
+            #     st_molstar_docking(f"{cfn.WORK_DIR}/{pdb_file}", height=500)
+            if viewer_selection == "py3Dmol":
+                color_options = {
+                    "Confidence": "pLDDT",
+                    "Rainbow": "rainbow",
+                    "Chain": "chain",
+                }
+                selected_color = st.sidebar.selectbox(
+                    "Color Scheme", options=list(color_options.keys()), index=0
+                )
+                # print(selected_color)
+                show_sidechains = st.sidebar.checkbox("Show Sidechains", value=False)
+                show_mainchains = st.sidebar.checkbox("Show Mainchains", value=False)
+                show_ligands = st.sidebar.checkbox("Show Ligands", value=True)
+                if len(cfn.VIEW_DICTS) > 0:
+                    with col2:
+                        select_view = st.selectbox(
+                            "Select a view", options=list(cfn.VIEW_DICTS.keys()), index=0
+                        )
+                    view = cfn.VIEW_DICTS[select_view]
+                    showmol(view, height=400, width=500)
+            float_parent()
 
 with open(f"{work_dir}/.history", "wb") as f:
     pickle.dump(st.session_state.messages, f)

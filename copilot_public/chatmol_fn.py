@@ -259,7 +259,7 @@ class ChatmolFN:
                     # st.
                     return res_df.to_string()
             else:
-                time.sleep(5)
+                time.sleep(15)
         # save_best_docking_result(docking_code, complex_file_path)
         # concate_ligand_to_receptor(complex_file_path, protein_pdb_file_path, complex_file_path)
         # log = get_docking_result(docking_code)
