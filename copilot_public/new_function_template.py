@@ -25,7 +25,9 @@ def get_smiles_feature(self, smiles):
         f"LOGP: {p.ALOGP:.2f}, "
         f"HBA (Hydrogen Bond Acceptors): {p.HBA}, "
         f"HBD (Hydrogen Bond Donors): {p.HBD}, "
-        f"PSA (Polar Surface Area): {p.PSA:.2f}"
+        f"PSA (Polar Surface Area): {p.PSA:.2f}, "
+        f"ROTB (Rotatble Bonds): {p.ROTB}, "
+        f"AROM (Aromatic Rings): {p.AROM}"
     )
     return formatted_result
 
