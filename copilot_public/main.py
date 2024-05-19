@@ -101,6 +101,16 @@ if st.sidebar.button("Clear Project History"):
         st.session_state.new_added_functions = []
         st.session_state.cfn = cfn_.ChatmolFN()
 
+
+# button_1, button_2 = st.columns([1, 1])
+if st.sidebar.button("Show/Hide Mol*"):
+    if (st.session_state.get('molstar',True)):
+        st.session_state['molstar'] = False
+        _, chatcol, _ = st.columns([1, 3, 1])
+    else:
+        chatcol, displaycol = st.columns([1, 1])
+        st.session_state['molstar'] = True
+
 if not os.path.exists(work_dir):
     os.makedirs(work_dir)
 if os.path.exists(f"{work_dir}/.history"):
@@ -208,14 +218,6 @@ if "messages" not in st.session_state or st.session_state.messages == []:
 
 chatcol, displaycol = st.columns([1, 1])
 
-# button_1, button_2 = st.columns([1, 1])
-if st.sidebar.button("Show Mol*"):
-    chatcol, displaycol = st.columns([1, 1])
-    st.session_state['molstar'] = True
-
-if st.sidebar.button("Hide Mol*"):
-    st.session_state['molstar'] = False
-    _, chatcol, _ = st.columns([1, 3, 1])
 
 with chatcol:
     for message in st.session_state.messages:
