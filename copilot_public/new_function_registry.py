@@ -1,15 +1,13 @@
 import types
 import os
+import re
 import requests
 import urllib.parse
 from enum import Enum
 from build_from_registry import *
 
-registry_host_port = os.getenv("registry_host_port")
+registry_host_port = os.getenv("REGISTRY_HOST_PORT")
 print("registry_host_PORT  ", registry_host_port)
-
-# func_code_dict
-# func_sche_dict
 
 test_data = []
 
@@ -20,7 +18,6 @@ def call_fastapi(service: str, params={}):
     print("1 input service name = ", service)
     print("2 Get all registerred services")
     registry = requests.get("http://"+registry_host_port+"/registry").json()
-    #registry = requests.get("http://100.89.180.132:9999/registry").json()
     print("3 Length of Registry = ",len(registry))
 
     # Search for service endpoint by service name
@@ -52,6 +49,7 @@ def call_fastapi(service: str, params={}):
 
 func_code_list = []
 func_sche_list = []
+func_list = []
 
 for key in func_code_dict.keys():
     sche = {"type": "function", "function": func_sche_dict[key]}
@@ -59,8 +57,7 @@ for key in func_code_dict.keys():
     func_sche_list.append(sche)
 
 
-func_list = []
-for i in range(len(func_sche_list)):
+for i in range(len(func_code_list)):
     code = func_code_list[i]
     sche = func_sche_list[i]
     service_name = sche['function']['name']

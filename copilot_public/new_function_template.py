@@ -32,6 +32,37 @@ def get_smiles_feature(self, smiles):
     return formatted_result
 
 
+def calculate_mol_properties(self, smiles_key):
+    from rdkit import Chem
+    from rdkit.Chem.QED import properties
+    from chatmol_fn import redis_reader, redis_writer
+
+    smiles_list = redis_reader(smiles_key)
+    
+    results = []
+    for smiles in smiles_list:
+        try:
+            mol = Chem.MolFromSmiles(smiles)
+        except:
+            return "Error: Not a valid SMILES string"
+        p = properties(mol)
+        result_dict = {
+            "Molecule": smiles, 
+            "Molecular Weight": float(f"{p.MW:.2f}"), 
+            "LOGP": float(f"{p.ALOGP:.2f}"), 
+            "HBA (Hydrogen Bond Acceptors)": p.HBA, 
+            "HBD (Hydrogen Bond Donors)": p.HBD, 
+            "PSA (Polar Surface Area)": float(f"{p.PSA:.2f}"), 
+            "ROTB (Rotatable Bonds)": p.ROTB, 
+            "AROM (Aromatic Rings)": p.AROM
+        }
+        results.append(result_dict)
+    # Save the results into redis cache
+    redis_key = "mol_property_table"
+    redis_writer(redis_key,results)
+    # Convert to string!
+    return f"molecule property table has been saved to redis cache with a redis key: {redis_key} \\n" + str(results)
+
 def capped(self, smiles):
     """ cap one amino acid """
     from rdkit import Chem
@@ -157,6 +188,22 @@ function_descriptions = [{  # This is the description of the function
 {
     "type": "function",
     "function": {
+        "name": "calculate_mol_properties",
+        "description": "Calculate properties for a list of smiles started in Redis cache, and will return a list of molecular \
+                        properties, including weight, logp, HBA(Hydrogen Bond Acceptors), HBD(Hydrogen Bond Donors) \
+                        PSA(Polar Surface Area) values, ROTB(Rotatable Bonds) and AROM(Aromatic Rings)",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "smiles_key": {"type": "string", "description": "Redis key for a list of smiles"},
+            },
+        },
+        "required": ["smiles_key"],
+    }
+},
+{
+    "type": "function",
+    "function": {
         "name": "capped",
         "description": "Input a smiles, and will return a capped smiles, which \
                         means adding ACE and NME to the smiles to prevent or \
@@ -201,6 +248,14 @@ test_data = {
         "input": {
             "self": None,
             "smiles": "C[C@H](N)C(=O)N[C@@H](CS)C(=O)N[C@@H](CS)C(=O)O",
+        },
+        "output": "Molecular Weight: 295.39, LOGP: -1.75, HBA (Hydrogen Bond Acceptors): \
+                   5, HBD (Hydrogen Bond Donors): 6, PSA (Polar Surface Area): 121.52",
+    },
+    "calculate_mol_properties": {
+        "input": {
+            "self": None,
+            "smiles_key": "DenovoGen_smiles",
         },
         "output": "Molecular Weight: 295.39, LOGP: -1.75, HBA (Hydrogen Bond Acceptors): \
                    5, HBD (Hydrogen Bond Donors): 6, PSA (Polar Surface Area): 121.52",

@@ -1,11 +1,14 @@
 import json
 import requests
 import py3Dmol
+import pickle
+import redis
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from cloudmol.cloudmol import PymolFold
 from utils import query_pythia, handle_file_not_found_error
 import os
+import re
 from io import StringIO
 from stmol import showmol
 from rdkit import Chem
@@ -100,6 +103,41 @@ def save_best_docking_result(docking_code ,file_path):
         # with open(receptor_file_path, 'r') as receptor:
         #     f.write(receptor.read())
     return f"Docking result saved as {file_path}"
+
+def redis_writer(key, data):
+    # Serialize the Python object using pickle
+    r = redis.Redis(host='localhost', port=6379, db=0)  
+    # First, check redis service
+    try: 
+        r.ping()
+    except:
+        print("Redis is out of service")
+        return None
+    
+    # Save the serialized object to Redis
+    try:
+        serialized_data = pickle.dumps(data)
+        r.set(key, serialized_data)
+    except:
+        print("Error in redis_writer")
+
+def redis_reader(key):
+    # Retrieve the serialized object from Redis
+    r = redis.Redis(host='localhost', port=6379, db=0)
+    # First, check redis service
+    try: 
+        r.ping()
+    except:
+        print("Redis is out of service")
+        return None
+    try:
+        retrieved_data = r.get(key)
+        # Deserialize the object using pickle
+        data = pickle.loads(retrieved_data)
+        return data
+    except:
+        print("Error in redis_reader. Check the key!")
+        return None
 
 class ChatmolFN:
     def __init__(self, work_dir="./"):
@@ -271,6 +309,7 @@ class ChatmolFN:
         # # print(log)
         # return res_df.to_string()
 
+
     @handle_file_not_found_error
     def call_proteinmpnn_api(
             self,
@@ -409,3 +448,64 @@ class ChatmolFN:
         writer.write(mol)
         writer.close()
         return f"The conformation of {smiles} is saved as {file_name}"
+    
+    def python_executer(self, function_name):
+        # Guardrails to prevent dangerous code execution
+        print("function_name ------------------------------------------------------------- =", function_name)
+        work_dir = self.get_work_dir()
+        print("work_dir = ", work_dir)
+        file_path = "./Project-X/.history"
+        text = "Test"
+        try:
+            with open(file_path, 'rb') as f:
+                binary_data = f.read()
+                try:
+                    text = binary_data.decode('utf-8')
+                except UnicodeDecodeError:
+                    text = binary_data.decode('latin-1')  # or another appropriate encoding
+            print("TEXT = ", text)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        # Find all function definitions using a regex
+        functions = re.findall(r'def\s+\w+\s*\(.*?\):\n(?:\s+.*\n)*', text)
+        # Return the last function definition
+        function_code = functions[-1] if functions else None
+
+        print("function code ---------------------------------------")
+        print(function_code)
+        print("Function code ends heer -----------------------------")
+        dangerous_keywords = [
+            'exec', 'eval', 'import os', 'import subprocess', 'os.system', 'subprocess.call',
+            'subprocess.Popen', 'compile', 'builtins', '__import__', 'globals', 'locals',#'open'
+        ]
+        # Check if the function code contains any dangerous keywords
+        for keyword in dangerous_keywords:
+            if re.search(r'\b' + re.escape(keyword) + r'\b', function_code):
+                raise ValueError(f"Use of dangerous keyword '{keyword}' detected in the function code.")
+            
+        # Regular expression to extract the function name
+        pattern = r'\bdef\s+(\w+)\s*\(.*\)\s*:'
+
+        # Find all matches in the code
+        matches = re.findall(pattern, function_code)
+        function_name = "NoName"
+        if (len(matches) < 1):
+            raise ValueError(f"No function is defined")
+        function_name = matches[0]
+        print("Function_Name = ", function_name)
+        # Compile the function code
+        code_obj = compile(function_code, function_name, 'exec')
+
+        # Prepare a restricted execution environment
+        exec_env = {}
+        print("Function_Name 3 = ", function_name)
+        # Execute the compiled code object in the restricted namespace
+        exec(code_obj, exec_env)
+        # Retrieve the function from the restricted environment
+        service_func = exec_env.get(function_name)
+        # Ensure the function exists
+        if service_func is None:
+            raise ValueError(f"Function '{function_name}' is not defined in the provided code.")
+        # Call the function with the provided parameters
+        results = service_func()
+        return "This is the filtered molecules: "+ str(results)
