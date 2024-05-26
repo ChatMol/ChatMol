@@ -279,8 +279,20 @@ class ConversationHandler:
                     },
                     "required": ["pdb_file1", "pdb_file2"],
                 }
+            },
+            { "type": "function",
+                "function": {
+                    "name": "python_executer",
+                    "description": "Python executer creates a python function from python code (string), and execute it.",
+                     "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "function_name": {"type": "string", "description": "The python funciton name"},
+                        },
+                    },
+                    "required": ["function_name"],                   
+                }
             }
-            
             
         ]
         self.available_functions = {
@@ -299,6 +311,7 @@ class ConversationHandler:
             "blind_docking": self.cfn.blind_docking,
             "call_proteinmpnn_api": self.cfn.call_proteinmpnn_api,
             "compare_protein_structures": self.cfn.compare_protein_structures,
+            "python_executer": self.cfn.python_executer,
         }
 
     def setup_workdir(self, work_dir):

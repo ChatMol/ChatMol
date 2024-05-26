@@ -43,7 +43,7 @@ st.sidebar.write("2024 May 14 public version")
 st.sidebar.write(
     "ChatMol copilot is a AI platform for protein engineering, molecular design and computation. Also chekcout our [GitHub](https://github.com/JinyuanSun/ChatMol)."
 )
-st.write("Enjoy modeling proteins with ChatMol copilot! 🤖️ 🧬")
+st.write("The LLM Powered Agent for Protein Modeling and Molecular Computation 🤖️ 🧬")
 float_init()
 
 st.sidebar.title("Settings")
@@ -338,6 +338,10 @@ if prompt := st.chat_input("What is up?"):
                     "content": full_response,
                 }
             )
+            print("Debug: Full response from assistant", full_response)
+            with open(f"{work_dir}/workspace", "a") as f:
+                f.write(full_response)
+
             if tool_call:
                 st.session_state.messages = st.session_state.messages[:-1]
                 if st.session_state.openai_model == "glm-4":
@@ -442,6 +446,7 @@ if prompt := st.chat_input("What is up?"):
                             "content": full_response,
                         }
                     )
+                    print("Debug: Full response from tool calling", full_response)
 
                 message_placeholder.markdown(full_response)
 uploaded_file = st.sidebar.file_uploader("Upload PDB file", type=["pdb"])

@@ -1,29 +1,13 @@
 import json
 import requests
-# import pymol
 import os
-# import pandas as pd
-# import openai
-# import time
-# import types
-# import urllib.parse
 import pprint
-# from datetime import datetime
-# from pymol import cmd
-# from urllib.parse import quote
-
 
 os.environ["REGISTRY_HOST_PORT"]="100.89.180.132:9999"
 api_key = os.getenv("OPENAI_API_KEY")
 app_pw = os.getenv("GMAIL_APP_PASSWORD")
 registry_host_port = os.getenv("REGISTRY_HOST_PORT")
 
-#os.environ["REGISTRY_HOST_PORT"]="100.89.180.132:9999"
-
-# Search for pymol service endpoint
-# print("Registry Host Port = ",registry_host_port)
-# print(requests.get("http://"+registry_host_port+"/registry"))
-# print("END")
 registry = requests.get("http://"+registry_host_port+"/registry").json()
 pymol_endpoint = ""
 for key in registry.keys():
@@ -276,6 +260,7 @@ def get_default_value(param_desc):
     
 # Dynamic generation of new python functions from registry
 def func_code_gen(registry):
+    molgen_funcs = ['DenovoGen','MotifExtend','SuperStructure','ScaffoldMorphine','LinkerGen']
     for key in registry.keys():
         r = registry[key]
         param_desc_str = r['param_desc'].replace("'",'"')
@@ -304,6 +289,7 @@ def func_code_gen(registry):
         func_arg_str = ",".join(func_args)
         print("func_arg_str = ", func_arg_str)
         dec_func.append("def "+r['service_name']+"(self," + func_arg_str +"):")
+        dec_func.append("    from chatmol_fn import redis_writer, redis_reader")
         dec_func.append(f"    print('{service_name} is called')")       
         dec_func.append("    param_dict = {}")
         for param_name in param_desc.keys():
@@ -315,9 +301,17 @@ def func_code_gen(registry):
         dec_func.append("    #Call the generic FastAPI")
         code = f"    messages = call_fastapi('{service_name}', param_dict)"
         dec_func.append(code)
-        dec_func.append("    return 'The results are: ' + str(messages)")
-
+        dec_func.append("    message = ''")
+        if (service_name in molgen_funcs):
+            # create smiles_key = service_name_smiles
+            dec_func.append(f"    smiles_key = '{service_name}' + '_smiles'")
+            dec_func.append(f"    redis_writer(smiles_key, messages)")
+            #dec_func.append("    message = 'Generated ' + str(len(messages)) + 'molecules\n'")
+            dec_func.append(f"    message = 'Generated ' + str(len(messages)) + ' molecules. '")
+            dec_func.append(f"    message += 'Generated SMILES list is save to redis cache with smiles_key: ' + smiles_key ") 
+        dec_func.append("    return message + ' The results are: ' + str(messages)")
         code_str = "\n".join(dec_func)
+        print(code_str)
         func_code_dict[service_name] = code_str
         
     return func_code_dict
