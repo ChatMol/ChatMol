@@ -5,6 +5,7 @@ Started from a PyMol plugin.
 - [ChatMol](#chatmol)
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
+  - [ChatMol + Streamlit](#chatmol--streamlit)
   - [ChatMol python package](#chatmol-python-package)
   - [Copilot](#copilot)
   - [ChatMol Website](#chatmol-website)
@@ -20,6 +21,10 @@ Started from a PyMol plugin.
 
 ## Overview
 The PyMOL ChatGPT Plugin seamlessly integrates LLMs into PyMOL, enabling users to interact with PyMOL using natural language instructions. This tool simplifies PyMOL tasks and offers suggestions, explanations, and guidance on a wide range of PyMOL-related topics. ChatMol provides various interaction modes with PyMOL, including the PyMOL command line, miniGUI chatbot, python and web browsers.
+
+## ChatMol + Streamlit
+
+We also provide a Streamlit app for ChatMol, which can be used as a task execution agent or Q&A chatbot. It retains your entire conversation history with ChatMol, and you have the flexibility to modify the execution plan suggested by ChatMol. See more details in [here](./chatmol-streamlit/README.md).
 
 ## ChatMol python package
 
