@@ -16,10 +16,11 @@ class PymolServer():
         """
         # Start PyMOL as a subprocess
         self.pymol_process = subprocess.Popen(
-            [pymol_path, "-R"],
+            "pymol -R",
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            shell=True,
             bufsize=1,  # Line-buffered
             universal_newlines=True
         )
