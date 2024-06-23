@@ -18,7 +18,10 @@ def clear_stashed_commands():
 def clear_chat_history():
     return defaul_client.clear_chat_history()
 
-def start_pymol():
+def start_pymol_gui():
     pymolserver = PymolServer(defaul_client)
+    pymolserver.start_pymol()
     return pymolserver
 
+def warnings():
+    return defaul_client.warnings
