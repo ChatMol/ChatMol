@@ -2,12 +2,13 @@ from setuptools import setup, find_packages
 
 setup(
     name='chatmol',
-    version='0.1.0',
+    version='0.2.3',
     packages=find_packages(),
     install_requires=[
         'requests', 
-        'openai==1.3.9',
-        'anthropic==0.19.1'
+        'openai>=1.3.9',
+        'anthropic>=0.19.1',
+        'streamlit>=1.35.0'
     ],
     author='The ChatMol Team',
     author_email='jinyuansun@chatmol.org',
