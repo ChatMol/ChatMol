@@ -69,14 +69,14 @@ if prompt := st.chat_input("What is up?"):
             elif st.session_state["llm"] in claude_llms:
                 response = st.session_state["cm"].chat_with_claude(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my question: \n\n{prompt}")
             elif st.session_state["llm"] in chatmol_llms:
-                response = st.session_state["cm"].chatlite(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my question: \n\n{prompt}")
+                response = st.session_state["cm"].chatlite(f"Instruction: {prompt}")
         else:
             if st.session_state["llm"] in openai_llms:
                 response = st.session_state["ps"].chatgpt(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my instruction: \n\n{prompt}")
             elif st.session_state["llm"] in claude_llms:
                 response = st.session_state["ps"].claude(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my instruction: \n\n{prompt}")
             elif st.session_state["llm"] in chatmol_llms:
-                response = st.session_state["ps"].chatlite(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my instruction: \n\n{prompt}")
+                response = st.session_state["ps"].chatlite(f"Instruction: {prompt}")
     
         st.session_state.messages.append({"role": "assistant", "content": response})
     with st.chat_message("assistant"):
