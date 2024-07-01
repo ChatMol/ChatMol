@@ -27,6 +27,7 @@ class ChatMol:
         self.lite_conversation_history = ""
         self.chatgpt_conversation_history = []
         self.claude_conversation_messages = []
+        self.chatmol_llm_conversation_history = []
         self.chatgpt_sys_prompt = "You are an expert familiar with PyMOL and specialized in providing PyMOL command line code solutions accuratly, and concisely. "
         self.chatgpt_sys_prompt += "When providing demos or examples, try to use 'fetch' if object name is not provided. "
         self.chatgpt_sys_prompt += "Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."
@@ -99,6 +100,11 @@ class ChatMol:
 
 
     def init_clients(self):
+        self.client_chatmol = OpenAI(
+            api_key="0",
+            base_url="https://u48777-be32-7f3f0ef6.westb.seetacloud.com:8443/v1"
+        )
+
         if os.environ.get("ANTHROPIC_API_KEY"):
             self.client_anthropic = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         elif api_key := self.load_api_key("anthropic") != "":
@@ -177,6 +183,31 @@ class ChatMol:
                 {"role": "assistant", "content": answer}
             )
 
+            return answer
+        except Exception as e:
+            print(f"Error: {e}")
+            return ""
+        
+    def chat_with_chatmol_llm(self, message):
+        self.chatmol_llm_conversation_history.append(
+            {"role": "user", "content": message}
+        )
+        try:
+            messages = []            
+            for message in self.chatmol_llm_conversation_history[-self.chatgpt_max_history:]:
+                messages.append(message)
+            response = self.client_chatmol.chat.completions.create(
+                model="test",
+                messages=messages,
+                max_tokens=self.chatgpt_max_tokens,
+                n=1,
+                temperature=0,
+            )
+            answer = response.choices[0].message.content.strip()
+
+            self.chatmol_llm_conversation_history.append(
+                {"role": "assistant", "content": answer}
+            )
             return answer
         except Exception as e:
             print(f"Error: {e}")

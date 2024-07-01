@@ -6,13 +6,14 @@ st.sidebar.markdown("Welcome to ChatMol! ChatMol is a tool that allows you to in
 
 openai_llms = ['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo']
 claude_llms = ['claude-3-5-sonnet-20240620', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307', 'claude-3-opus-20240229']
-chatmol_llms = ['chatlite']
+chatmol_llms = ['chatlite', "chatmol-llm-0.1"]
 
 introduction_of_models = {
     'gpt-4o': "GPT-4o (“o” for “omni”) is most advanced model of OpenAI. It has the same high intelligence as GPT-4 Turbo but is much more efficient—it generates text 2x faster and is 50% cheaper.",
     'gpt-4-turbo': "GPT-4 can solve difficult problems with greater accuracy than any of previous models of OpenAI, thanks to its broader general knowledge and advanced reasoning capabilities.",
     'gpt-3.5-turbo': "GPT-3.5 Turbo models can understand and generate natural language or code and have been optimized for chat.",
-    'chatlite': "A model provided by ChatMol freely available to all, which is optimized for PyMOL commands generation but not good for general chat.",
+    'chatlite': "A service provided by ChatMol freely available to all, which is optimized for PyMOL commands generation but not good for general chat.",
+    'chatmol-llm-0.1': "A model provided by ChatMol freely available to all, which is optimized for PyMOL commands generation but still can be used for general chat.",
     'claude-3-5-sonnet-20240620': "Most intelligent model of Anthropic, combining top-tier performance with improved speed. Currently the only model in the Claude 3.5 family.\n - Advanced research and analysis\n - Complex problem-solving\n - Sophisticated language understanding and generation\n - High-level strategic planning",
     'claude-3-sonnet-20240229': "Balances intelligence and speed for high-throughput tasks.\n - Data processing over vast amounts of knowledge\n - Sales forecasting and targeted marketing\n - Code generation and quality control",
     'claude-3-haiku-20240307': "Near-instant responsiveness that can mimic human interactions.\n - Live support chat\n - Translations\n - Content moderation\n - Extracting knowledge from unstructured data",
@@ -69,14 +70,20 @@ if prompt := st.chat_input("What is up?"):
             elif st.session_state["llm"] in claude_llms:
                 response = st.session_state["cm"].chat_with_claude(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my question: \n\n{prompt}")
             elif st.session_state["llm"] in chatmol_llms:
-                response = st.session_state["cm"].chatlite(f"Instruction: {prompt}")
+                if st.session_state["llm"] == "chatlite":
+                    response = st.session_state["ps"].chatlite(f"Instruction: {prompt}")
+                else:
+                    response = st.session_state["ps"].chatmol(f"{prompt}")
         else:
             if st.session_state["llm"] in openai_llms:
                 response = st.session_state["ps"].chatgpt(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my instruction: \n\n{prompt}")
             elif st.session_state["llm"] in claude_llms:
                 response = st.session_state["ps"].claude(f"This is the log: \n\n{st.session_state['ps'].pymol_console}\n\n. This is my instruction: \n\n{prompt}")
             elif st.session_state["llm"] in chatmol_llms:
-                response = st.session_state["ps"].chatlite(f"Instruction: {prompt}")
+                if st.session_state["llm"] == "chatlite":
+                    response = st.session_state["ps"].chatlite(f"Instruction: {prompt}")
+                else:
+                    response = st.session_state["ps"].chatmol(f"{prompt}")
     
         st.session_state.messages.append({"role": "assistant", "content": response})
     with st.chat_message("assistant"):

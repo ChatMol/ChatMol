@@ -151,3 +151,46 @@ class PymolServer():
         except Exception as e:
             print(f"Error during command execution: {e}")
         return response
+    
+    def chatmol(self, message, execute:bool=True):
+        message = message.strip()
+        if message == "e" or message == 'execute':
+            if len(self.cm.stashed_commands) == 0:
+                print("There is no stashed commands")
+            else:
+                for command in self.cm.stashed_commands:
+                    self.server.do(command)
+                self.cm.clear_stashed_commands()
+            return 0
+        
+        if message == "new":
+            self.cm.clear_chat_history()
+            self.cm.clear_stashed_commands()
+            return 0
+        
+        if message.endswith('?'):
+            execute = False
+        
+        response = self.cm.chat_with_chatmol_llm(message)  # Using the chat_with_gpt method
+        print("ChatMol:", response)
+        try:
+            command_blocks = []
+            self.cm.clear_stashed_commands()
+            for i, block in enumerate(response.split("```")):
+                if i % 2 == 1:
+                    command_blocks.append(block)
+            for command_block in command_blocks:
+                for command in command_block.split("\n"):
+                    if command.strip() and not command.strip().startswith("#"):
+                        if command.strip() == "pymol" or command.strip() == "bash":
+                            continue  # Skipping python commands
+                        if "#" in command:
+                            command, comment = command.split("#")
+                        if execute:
+                            print(command)
+                            self.server.do(command)
+                        else:
+                            self.cm.stashed_commands.append(command)
+        except Exception as e:
+            print(f"Error during command execution: {e}")
+        return response
