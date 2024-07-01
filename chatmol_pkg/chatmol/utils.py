@@ -102,7 +102,7 @@ class ChatMol:
     def init_clients(self):
         self.client_chatmol = OpenAI(
             api_key="0",
-            base_url="https://u48777-be32-7f3f0ef6.westb.seetacloud.com:8443/v1"
+            base_url="https://llm.cloudmol.org/v1"
         )
 
         if os.environ.get("ANTHROPIC_API_KEY"):
