@@ -11,7 +11,7 @@ class ChatMol:
                 gpt_model="gpt-3.5-turbo-1106",
                 chatgpt_max_history=10,
                 chatgpt_temp=0,
-                chatgpt_max_tokens=256,
+                chatgpt_max_tokens=2048,
                 claude_model="claude-3-opus-20240229",
                 in_pymol=False
                 ):
@@ -193,9 +193,10 @@ class ChatMol:
             {"role": "user", "content": message}
         )
         try:
-            messages = []            
-            for message in self.chatmol_llm_conversation_history[-self.chatgpt_max_history:]:
-                messages.append(message)
+            messages = self.chatmol_llm_conversation_history
+            if len(messages) > self.chatgpt_max_history:
+                messages.pop(0)
+                messages.pop(0)
             response = self.client_chatmol.chat.completions.create(
                 model="test",
                 messages=messages,
