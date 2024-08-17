@@ -231,7 +231,7 @@ def func_schema_gen(registry):
             if (p_desc.find('Optional') == -1 and p_desc.find('optional') == -1):
                 required.append(param_name)
             props[param_name] = {'type':"string","description":param_desc[param_name]}
-        params['reguired'] = required
+        params['required'] = required
         func_schema['parameters'] = params
         func_sche_dict[r['service_name']] = func_schema
         pprint.pprint(func_schema)
