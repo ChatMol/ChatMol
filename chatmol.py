@@ -106,8 +106,8 @@ def load_api_key():
         client = OpenAI(api_key=api_key)
         print("API key loaded from environment variable.")
     return client
-
-def update_model(mdoel_name):
+    
+def update_model(model_name):
     global GPT_MODEL
     GPT_MODEL = mdoel_name
     print("Model updated to: ", GPT_MODEL)
