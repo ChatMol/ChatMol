@@ -74,7 +74,7 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
-GPT_MODEL = "gpt-3.5-turbo-1106"
+GPT_MODEL = "gpt-3.5-turbo"
 client = None
 
 def set_api_key(api_key):
