@@ -135,6 +135,9 @@ python miniGUI.py
 Here is a screenshot of the miniGUI:
 ![img](./assets/chatmol_lite.png)
 
+## Acknowledgements
+
+As an open source project, we thank the support from [ChemXAI](https://www.chemxai.com/), [WeComput](https://www.wecomput.com/) and [levinthal](https://www.levinthal.bio/).
 
 ## License
 This project is released under the MIT License.
