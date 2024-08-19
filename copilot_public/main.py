@@ -210,7 +210,7 @@ if "messages" not in st.session_state or st.session_state.messages == []:
     st.session_state.messages = [
         {
             "role": "system",
-            "content": f"You are ChatMol copilot, a helpful copilot in molecule analysis with tools. Use tools only when you need them. Answer to questions related molecular modelling. When providing file path for downloading, use the realpath of the file without modification, it should be looks like: [link name](http://localhost:3333/work_dr/filename.suffix), the current work_dir is {work_dir}",
+            "content": f"You are ChatMol copilot, a helpful copilot in molecule analysis with tools. You think step-by-step before you conclude correctly. Use tools only when you need them. Answer to questions related molecular modelling. When providing file path for downloading, use the realpath of the file without modification, it should be looks like: [link name](http://localhost:3333/work_dr/filename.suffix), the current work_dir is {work_dir}",
         }
     ]
     if st.session_state.openai_model.startswith("glm"):

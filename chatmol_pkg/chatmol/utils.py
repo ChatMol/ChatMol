@@ -28,6 +28,7 @@ class ChatMol:
         self.chatgpt_conversation_history = []
         self.claude_conversation_messages = []
         self.chatgpt_sys_prompt = "You are an expert familiar with PyMOL and specialized in providing PyMOL command line code solutions accuratly, and concisely. "
+        self.chatgpt_sys_prompt += "You think step-by-step before you conclude correctly. "
         self.chatgpt_sys_prompt += "When providing demos or examples, try to use 'fetch' if object name is not provided. "
         self.chatgpt_sys_prompt += "Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."
 
