@@ -7,6 +7,7 @@ from pymol import cmd
 import http.server
 
 class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
+
     def __init__(self):
         
         from http import HTTPStatus
@@ -74,7 +75,7 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
-GPT_MODEL = "gpt-3.5-turbo"
+GPT_MODEL = "gpt-4o"
 client = None
 
 def set_api_key(api_key):
@@ -109,7 +110,7 @@ def load_api_key():
     
 def update_model(model_name):
     global GPT_MODEL
-    GPT_MODEL = mdoel_name
+    GPT_MODEL = model_name
     print("Model updated to: ", GPT_MODEL)
     return "Model updated to: " + GPT_MODEL
 

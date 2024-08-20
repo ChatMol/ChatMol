@@ -8,11 +8,11 @@ class ChatMol:
     def __init__(self,
                 openai_api_key=None, 
                 verbose=False,
-                gpt_model="gpt-3.5-turbo-1106",
+                gpt_model="gpt-4o",
                 chatgpt_max_history=10,
                 chatgpt_temp=0,
                 chatgpt_max_tokens=256,
-                claude_model="claude-3-opus-20240229",
+                claude_model="claude-3-5-sonnet-20240620",
                 in_pymol=False
                 ):
         self.in_pymol = in_pymol
