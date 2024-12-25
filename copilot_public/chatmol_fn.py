@@ -1,15 +1,143 @@
 import json
 import requests
 import py3Dmol
+import pickle
+import redis
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from cloudmol.cloudmol import PymolFold
 from utils import query_pythia, handle_file_not_found_error
 import os
+import re
+from io import StringIO
 from stmol import showmol
 from rdkit import Chem
 from rdkit.Chem import AllChem
+import time
+import pandas as pd
+from tool_utils import StructPair
 
+from Bio.PDB import PDBParser
+
+def read_first_model_pdbqt(pdbqt_filename):
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("PDBQT", pdbqt_filename)[0]
+    atoms = []
+    for atom in structure.get_atoms():
+        atoms.append(atom)
+    return atoms
+
+def format_as_pdb_hetatm(serial:int, atom_name:str, element:str, resseq:int, x, y, z):
+
+    x = "{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2f}          {:>2s}{:2s}".format('HETATM', serial, atom_name, "", "LIG", 'X', 1, "", float(x), float(y), float(z), 1.00, 0, element, '')
+    return x + '\n'
+
+def concate_ligand_to_receptor(ligand_file_path, receptor_file_path, output_filename):
+    parser = PDBParser(QUIET=True)
+    structure = parser.get_structure("receptor", receptor_file_path)[0]
+    ligand_atoms = read_first_model_pdbqt(ligand_file_path)
+    resseqs = [residue.id[1] for residue in structure.get_residues()]
+    serial = max([atom.serial_number for atom in structure.get_atoms()]) + 1
+    resseq = max(resseqs) + 1
+    with open(output_filename, 'w+') as f:
+        with open(receptor_file_path, 'r') as receptor_file:
+            for line in receptor_file:
+                if line.startswith("ATOM"):
+                    f.write(line)
+        for i, atom in enumerate(ligand_atoms):
+            x, y, z = atom.get_coord()
+            f.write(format_as_pdb_hetatm(serial+i, atom.get_name(), atom.element, resseq, x, y, z))
+        f.write("TER\n")
+    return output_filename
+
+def parse_vina_output(vina_output):
+    start = vina_output.find("mode |   affinity")
+    end = vina_output.find("Writing output")
+    result_str = vina_output[start:end].strip()
+    result_data = StringIO(result_str)
+    df = pd.read_csv(result_data, delim_whitespace=True, skiprows=3, names=['Mode', 'Affinity (kcal/mol)', 'RMSD l.b.', 'RMSD u.b.'])
+    return df
+
+def submit_docking_task(protein_file, ligand_file, center_x=0, center_y=0, center_z=0, box_size_x=20, box_size_y=20, box_size_z=20, aa_list=None):
+    headers = {
+        'accept': 'application/json',
+    }
+
+    files = {
+        'protein_file': open(protein_file, 'rb'),
+        'ligand_file': open(ligand_file, 'rb'),
+        'center_x': (None, str(center_x)),
+        'center_y': (None, str(center_y)),
+        'center_z': (None, str(center_z)),
+        'box_size_x': (None, str(box_size_x)),
+        'box_size_y': (None, str(box_size_y)),
+        'box_size_z': (None, str(box_size_z)),
+    }
+    if aa_list:
+        files['aa_list'] = (None, aa_list)
+    response = requests.post('https://dockingapi.cloudmol.org/api/dock', headers=headers, files=files)
+    return response.json()
+
+def submit_pocket_prediction_task(protein_file):
+    headers = {
+        'accept': 'application/json',
+    }
+    files = {
+        'file': open(protein_file, 'rb'),
+    }
+    response = requests.post('https://pocketapi.cloudmol.org/predict', headers=headers, files=files)
+    return response.json()
+
+def query_docking_status(docking_code):
+    response = requests.get(f'https://dockingapi.cloudmol.org/task_status/{docking_code}')# .decode('utf-8')
+    return response.text
+
+def get_docking_result(docking_code):
+    response = requests.get(f'https://dockingapi.cloudmol.org/task_progress/{docking_code}')
+    return response.text
+
+def save_best_docking_result(docking_code ,file_path):
+    response = requests.get(f'https://dockingapi.cloudmol.org/get_best_pose/{docking_code}/best_pose.pdb')
+    with open(file_path, 'w') as f:
+        f.write(response.text)
+        # with open(receptor_file_path, 'r') as receptor:
+        #     f.write(receptor.read())
+    return f"Docking result saved as {file_path}"
+
+def redis_writer(key, data):
+    # Serialize the Python object using pickle
+    r = redis.Redis(host='localhost', port=6379, db=0)  
+    # First, check redis service
+    try: 
+        r.ping()
+    except:
+        print("Redis is out of service")
+        return None
+    
+    # Save the serialized object to Redis
+    try:
+        serialized_data = pickle.dumps(data)
+        r.set(key, serialized_data)
+    except:
+        print("Error in redis_writer")
+
+def redis_reader(key):
+    # Retrieve the serialized object from Redis
+    r = redis.Redis(host='localhost', port=6379, db=0)
+    # First, check redis service
+    try: 
+        r.ping()
+    except:
+        print("Redis is out of service")
+        return None
+    try:
+        retrieved_data = r.get(key)
+        # Deserialize the object using pickle
+        data = pickle.loads(retrieved_data)
+        return data
+    except:
+        print("Error in redis_reader. Check the key!")
+        return None
 
 class ChatmolFN:
     def __init__(self, work_dir="./"):
@@ -132,24 +260,124 @@ class ChatmolFN:
         max_num = min(int(max_num), len(pdb_ids))
         return f"The top {max_num} PDB IDs are {pdb_ids[:max_num]}"
 
+    def blind_docking(self, protein_pdb_file_path, ligand_pdb_file_path, complex_file_path):
+        """
+        Blind docking between a protein and a ligand
+        Parameters:
+        - protein_pdb_file_path (str): The path to the protein PDB file.
+        - ligand_pdb_file_path (str): The path to the ligand PDB file.
+        - complex_file_path (str): The path to save the complex PDB file.
+
+        """
+        print('Submitting pocket prediction task...')
+        pocket_prediction = submit_pocket_prediction_task(protein_pdb_file_path)
+            
+        pocket_aas = pocket_prediction['Confident pocket residues'].replace('+', ',')
+        if len(pocket_prediction['Confident pocket residues'].split('+')) < 2:
+            pocket_aas = pocket_prediction['Likely pocket residues'].replace('+', ',')
+        print('Pocket residues:', pocket_aas)
+        print('Submitting docking task...')
+        docking_code = submit_docking_task(protein_pdb_file_path, ligand_pdb_file_path, aa_list=pocket_aas)
+        docking_code = docking_code['hash_code']
+        print(docking_code)
+        status = ""
+        status_prev = ''
+        print("status:")
+        while status != '"completed"':
+            status = query_docking_status(docking_code)
+        
+            print(f"Debug: {status}")
+            if status == '"completed"':
+                print("finished")
+                save_best_docking_result(docking_code, complex_file_path)
+                concate_ligand_to_receptor(complex_file_path, protein_pdb_file_path, complex_file_path)
+                log = get_docking_result(docking_code)
+                if log.endswith("done.\n"):
+                    res_df = parse_vina_output(log)
+                    # st.
+                    return res_df.to_string()
+            else:
+                time.sleep(15)
+        # save_best_docking_result(docking_code, complex_file_path)
+        # concate_ligand_to_receptor(complex_file_path, protein_pdb_file_path, complex_file_path)
+        # log = get_docking_result(docking_code)
+        # res_df = parse_vina_output(log)
+        # while res_df.empty:
+        #     log = get_docking_result(docking_code)
+        #     res_df = parse_vina_output(log)
+        # # print(res_df.to_string())
+        # # print(log)
+        # return res_df.to_string()
+
+
+    @handle_file_not_found_error
+    def call_proteinmpnn_api(
+            self,
+            path_to_pdb: str,
+            designed_chain: str = "A",
+            num_seqs: str = "1", # int,
+            homonomer: str ="false", #bool,
+            sampling_temp: str = '0.9', #int,
+            fixed_chain: str = None,
+    ):  
+        """
+        Calls the ProteinMPNN API to design protein sequences based on structures.
+        """
+        headers = {'accept': 'application/json'}
+        num_seqs = int(num_seqs)
+        homonomer = True if homonomer.lower() == "true" else False
+        sampling_temp = float(sampling_temp)
+
+        if fixed_chain is None:
+            params = {
+                'designed_chain': designed_chain,
+                'num_seqs': num_seqs,
+                'homonomer': homonomer,
+                'sampling_temp': sampling_temp,
+            }
+        else:
+            params = {
+                'designed_chain': designed_chain,
+                'fixed_chain': fixed_chain,
+                'num_seqs': num_seqs,
+                'homonomer': homonomer,
+                'sampling_temp': sampling_temp,
+            }
+
+        files = {'uploaded_file': open(path_to_pdb, 'rb')}
+        response = requests.post('https://api.cloudmol.org/protein/proteinmpnn/', params=params, headers=headers, files=files)
+        return response.text
+    
+    @handle_file_not_found_error
+    def compare_protein_structures(self, pdb_file1, pdb_file2):
+        """
+        Compare two protein structures using TMalign
+        Parameters:
+        - pdb_file1 (str): The path to the first PDB file.
+        - pdb_file2 (str): The path to the second PDB file.
+        """
+        sp = StructPair(pdb_file1, pdb_file2)
+        sp.tmalign()
+        return f"Aligned length: {sp.aligned_length}, RMSD: {sp.rmsd}, Identity: {sp.identity}, TM-score of {pdb_file1}: {sp.tmscore_p1}, TM-score of {pdb_file2}: {sp.tmscore_p2}"
+
     @handle_file_not_found_error
     def protein_single_point_mutation_prediction(self, pdb_file, mutations):
         pythia_res = query_pythia(pdb_file)
-        mutation_res = ""
+        mutation_res = "Mutation: Energy\n"
         for mutation in pythia_res.split("\n"):
             m, score = mutation.split()
             if m in mutations:
-                mutation_res += f"{m} {score}\n"
+                mutation_res += f"{m}: {score}\n"
         return mutation_res
 
     @handle_file_not_found_error
     def recommand_stable_mutations(self, pdb_file, cutoff=-2):
         pythia_res = query_pythia(pdb_file)
-        mutation_res = ""
+        mutation_res = "Mutation: Energy\n"
         for mutation in pythia_res.split("\n"):
             m, score = mutation.split()
             if float(score) < float(cutoff):
-                mutation_res += f"{m} {score}\n"
+                mutation_res += f"{m}: {score}\n"
         return mutation_res
 
     @handle_file_not_found_error
@@ -220,3 +448,64 @@ class ChatmolFN:
         writer.write(mol)
         writer.close()
         return f"The conformation of {smiles} is saved as {file_name}"
+    
+    def python_executer(self, function_name):
+        # Guardrails to prevent dangerous code execution
+        print("function_name ------------------------------------------------------------- =", function_name)
+        work_dir = self.get_work_dir()
+        print("work_dir = ", work_dir)
+        file_path = "./Project-X/.history"
+        text = "Test"
+        try:
+            with open(file_path, 'rb') as f:
+                binary_data = f.read()
+                try:
+                    text = binary_data.decode('utf-8')
+                except UnicodeDecodeError:
+                    text = binary_data.decode('latin-1')  # or another appropriate encoding
+            print("TEXT = ", text)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        # Find all function definitions using a regex
+        functions = re.findall(r'def\s+\w+\s*\(.*?\):\n(?:\s+.*\n)*', text)
+        # Return the last function definition
+        function_code = functions[-1] if functions else None
+
+        print("function code ---------------------------------------")
+        print(function_code)
+        print("Function code ends heer -----------------------------")
+        dangerous_keywords = [
+            'exec', 'eval', 'import os', 'import subprocess', 'os.system', 'subprocess.call',
+            'subprocess.Popen', 'compile', 'builtins', '__import__', 'globals', 'locals',#'open'
+        ]
+        # Check if the function code contains any dangerous keywords
+        for keyword in dangerous_keywords:
+            if re.search(r'\b' + re.escape(keyword) + r'\b', function_code):
+                raise ValueError(f"Use of dangerous keyword '{keyword}' detected in the function code.")
+            
+        # Regular expression to extract the function name
+        pattern = r'\bdef\s+(\w+)\s*\(.*\)\s*:'
+
+        # Find all matches in the code
+        matches = re.findall(pattern, function_code)
+        function_name = "NoName"
+        if (len(matches) < 1):
+            raise ValueError(f"No function is defined")
+        function_name = matches[0]
+        print("Function_Name = ", function_name)
+        # Compile the function code
+        code_obj = compile(function_code, function_name, 'exec')
+
+        # Prepare a restricted execution environment
+        exec_env = {}
+        print("Function_Name 3 = ", function_name)
+        # Execute the compiled code object in the restricted namespace
+        exec(code_obj, exec_env)
+        # Retrieve the function from the restricted environment
+        service_func = exec_env.get(function_name)
+        # Ensure the function exists
+        if service_func is None:
+            raise ValueError(f"Function '{function_name}' is not defined in the provided code.")
+        # Call the function with the provided parameters
+        results = service_func()
+        return "This is the filtered molecules: "+ str(results)

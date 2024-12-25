@@ -10,7 +10,7 @@ def handle_file_not_found_error(func):
         try:
             return func(*args, **kwargs)
         except FileNotFoundError:
-            return f"Current working directory is: {args[0].get_work_dir()}"
+            return f"Encountered FileNotFoundError! Current working directory is: {args[0].get_work_dir()}"
     return wrapper
 
 def function_args_to_streamlit_ui(func, args=None, tool_call_id=None):
@@ -67,7 +67,8 @@ def query_pythia(pdb_file):
     params = {'output_format': '2col','energy_threshold': '1',}
     files = {'file': open(pdb_file, 'rb'),}
     response = requests.post(
-        'https://u48777-a763-8569dc34.westa.seetacloud.com:8443/scan/',
+        # 'https://u48777-a763-8569dc34.westa.seetacloud.com:8443/scan/',
+        'https://api.cloudmol.org/protein/pythia_scan/',
         params=params,
         headers=headers,
         files=files,

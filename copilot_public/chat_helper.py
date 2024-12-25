@@ -1,6 +1,8 @@
 import json
 import os
 import rdkit
+import time
+import pandas as pd
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import (
     Function,
@@ -228,6 +230,69 @@ class ConversationHandler:
                     "required": ["query", "type"],
                 },
             },
+            {
+                "type": "function",
+                "function": {
+                    "name": "blind_docking",
+                    "description": "Perform blind docking using the input protein and ligand",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "protein_pdb_file_path": {"type": "string", "description": "The file path to a local pdb file of the protein"},
+                            "ligand_pdb_file_path": {"type": "string","description": "The file path to a local pdb file of the ligand"},
+                            "complex_file_path": {"type": "string","description": "The path to save the complex PDB file. Need to be in the same directory as the protein and ligand pdb files"},
+                        },
+                    },
+                    "required": ["query", "type"],
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "call_proteinmpnn_api",
+                    "description": "Calls the ProteinMPNN API to design protein sequences based on structures",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "path_to_pdb": {"type": "string", "description": "The path to the PDB file."},
+                            "designed_chain": {"type": "string", "description": "The designed chain identifier."},
+                            "num_seqs": {"type": "string", "description": "The number of sequences to generate."},
+                            "homonomer": {"type": "string", "description": "Indicates whether the protein is a homomer or not."},
+                            "sampling_temp": {"type": "string", "description": "The sampling temperature."},
+                            "fixed_chain": {"type": "string", "description": "The fixed chain identifier, optional.", "default": None},
+                        },
+                    },
+                    "required": ["path_to_pdb", "designed_chain","num_seqs", "homonomer", "sampling_temp","fixed_chain"],
+                }
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "compare_protein_structures",
+                    "description": "Compare the structures of two proteins with TMAlign",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "pdb_file1": {"type": "string", "description": "The file path to a local pdb file of the first protein"},
+                            "pdb_file2": {"type": "string", "description": "The file path to a local pdb file of the second protein"},
+                        },
+                    },
+                    "required": ["pdb_file1", "pdb_file2"],
+                }
+            },
+            { "type": "function",
+                "function": {
+                    "name": "python_executer",
+                    "description": "Python executer creates a python function from python code (string), and execute it.",
+                     "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "function_name": {"type": "string", "description": "The python funciton name"},
+                        },
+                    },
+                    "required": ["function_name"],                   
+                }
+            }
             
         ]
         self.available_functions = {
@@ -243,6 +308,10 @@ class ConversationHandler:
             "get_protein_sequence_from_pdb": self.cfn.get_protein_sequence_from_pdb,
             "search_rcsb": self.cfn.search_rcsb,
             "query_uniprot": self.cfn.query_uniprot,
+            "blind_docking": self.cfn.blind_docking,
+            "call_proteinmpnn_api": self.cfn.call_proteinmpnn_api,
+            "compare_protein_structures": self.cfn.compare_protein_structures,
+            "python_executer": self.cfn.python_executer,
         }
 
     def setup_workdir(self, work_dir):
@@ -289,6 +358,10 @@ class ConversationHandler:
         return response, second_response
 
 
+# class GLMConversationHandler(ConversationHandler):
+#     from zhipuai import ZhipuAI
+
+
 def compose_chat_completion_message(
     role="assistant", content="", tool_call_dict_list=[]
 ):
@@ -309,3 +382,18 @@ def compose_chat_completion_message(
         tool_calls=tool_calls,
     )
     return message
+
+def extract_function_and_execute(llm_output, messages):
+    name = llm_output.choices[0].message.tool_calls[0].function.name
+    params = json.loads(llm_output.choices[0].message.tool_calls[0].function.arguments)
+    function_to_call = globals().get(name)
+    if not function_to_call:
+        raise ValueError(f"Function '{name}' not found")
+
+    messages.append(
+        {
+            "role": "tool",
+            "content": str(function_to_call(**params))
+        }
+    )
+    return messages

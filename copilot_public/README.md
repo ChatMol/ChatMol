@@ -18,6 +18,17 @@ pip install -r requirements.txt
 ```bash
 streamlit run main.py
 ```
+
+## Example
+
+### Example 1: enzyme for toxin degradation
+
+After the copliot is strateted, change the `Project Name` to `examples/enzyme-for-toxin-degradation`, you will see the history of how copliot:
+ - explain the toxin ZEA 
+ - find the chemical structure of ZEA
+ - search the enzyme for ZEA degradation
+ - download predicted 3D structure of the enzyme adn run docking
+
 ## Want more funtionality?
 
 You can easily add more functionality to ChatMol copilot. 
@@ -71,11 +82,9 @@ You are more than welcome to contribute any function to ChatMol copilot.
 ## TODO
 ### Analysis tools
 - [ ] **Protein Docking Simulation**: Develop a simulation tool for docking small molecule ligands to protein targets, exploring potential binding modes.
-  - AutoDock Vina (High priority)
-  - DiffDock (Low priority)
+  - DiffDock
   
 - [ ] **Protein Structure and Sequence Comparison**: Build a tool for comparing the structures of multiple proteins, identifying similarities, differences, and motifs.
-  - TM-align (High priority)
   - Kalign (Medium priority)
   - MMseqs2 (Low priority)
 
@@ -91,8 +100,7 @@ You are more than welcome to contribute any function to ChatMol copilot.
 
 
 ### visualization tools
-- [ ] **Protein-Ligand Interaction Visualization**: Create a tool for visualizing and analyzing protein-ligand interactions, focusing on key binding residues.
-
+- [ ] **Protein-Ligand Interaction Visualization**: Create a tool for visualizing and analyzing protein-ligand interactions, focusing on key binding residues.(Mol* partically done)
 
 ## Online Version
 We provided an online version for you. [Click here](https://chatmol.org/copilot/) to try it.  

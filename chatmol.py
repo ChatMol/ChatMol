@@ -7,6 +7,7 @@ from pymol import cmd
 import http.server
 
 class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
+
     def __init__(self):
         
         from http import HTTPStatus
@@ -74,7 +75,7 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
-GPT_MODEL = "gpt-3.5-turbo-1106"
+GPT_MODEL = "gpt-4o"
 client = None
 
 def set_api_key(api_key):
@@ -106,10 +107,10 @@ def load_api_key():
         client = OpenAI(api_key=api_key)
         print("API key loaded from environment variable.")
     return client
-
-def update_model(mdoel_name):
+    
+def update_model(model_name):
     global GPT_MODEL
-    GPT_MODEL = mdoel_name
+    GPT_MODEL = model_name
     print("Model updated to: ", GPT_MODEL)
     return "Model updated to: " + GPT_MODEL
 
@@ -120,7 +121,7 @@ def chat_with_gpt(message, max_history=10):
 
     try:
         messages = [
-            {"role": "system", "content": "You are an AI language model specialized in providing command line code solutions related to PyMOL. Generate clear and effective solutions in a continuous manner. When providing demos or examples, try to use 'fetch' if object name is not provided. Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."}
+            {"role": "system", "content": "You are an AI language model specialized in providing command line code solutions related to PyMOL. Generate clear and effective solutions in a continuous manner. You think step-by-step before you conclude correctly. When providing demos or examples, try to use 'fetch' if object name is not provided. Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."}
         ]
 
         # Keep only the max_history latest exchanges to avoid making the conversation too long
