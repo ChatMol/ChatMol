@@ -11,8 +11,8 @@ class ChatMol:
                 gpt_model="gpt-4o",
                 chatgpt_max_history=10,
                 chatgpt_temp=0,
-                chatgpt_max_tokens=256,
-                claude_model="claude-3-5-sonnet-20240620",
+                chatgpt_max_tokens=2048,
+                claude_model="claude-3-opus-20240229",
                 in_pymol=False
                 ):
         self.in_pymol = in_pymol
@@ -27,11 +27,14 @@ class ChatMol:
         self.lite_conversation_history = ""
         self.chatgpt_conversation_history = []
         self.claude_conversation_messages = []
+        self.chatmol_llm_conversation_history = []
         self.chatgpt_sys_prompt = "You are an expert familiar with PyMOL and specialized in providing PyMOL command line code solutions accuratly, and concisely. "
         self.chatgpt_sys_prompt += "You think step-by-step before you conclude correctly. "
         self.chatgpt_sys_prompt += "When providing demos or examples, try to use 'fetch' if object name is not provided. "
-        self.chatgpt_sys_prompt += "Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line."
-
+        self.chatgpt_sys_prompt += "Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line. "
+        self.chatmol_llm_prompt_dict = {
+            "v1": "You are a helpful assistant. User's query may be a instruction to write PyMOL commands."
+        }
         self.chatgpt_max_history = chatgpt_max_history
         self.gpt_model = gpt_model
         self.claude_model = claude_model
@@ -100,6 +103,11 @@ class ChatMol:
 
 
     def init_clients(self):
+        self.client_chatmol = OpenAI(
+            api_key="0",
+            base_url="https://llm.cloudmol.org/v1"
+        )
+
         if os.environ.get("ANTHROPIC_API_KEY"):
             self.client_anthropic = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
         elif api_key := self.load_api_key("anthropic") != "":
@@ -178,6 +186,33 @@ class ChatMol:
                 {"role": "assistant", "content": answer}
             )
 
+            return answer
+        except Exception as e:
+            print(f"Error: {e}")
+            return ""
+        
+    def chat_with_chatmol_llm(self, message):
+        self.chatmol_llm_conversation_history.append(
+            {"role": "user", "content": message}
+        )
+        try:
+            messages = self.chatmol_llm_conversation_history
+            if len(messages) > self.chatgpt_max_history:
+                messages.pop(0)
+                messages.pop(0)
+            messages = [{'role': 'system', 'content': self.chatmol_llm_prompt_dict["v1"]}] + messages
+            response = self.client_chatmol.chat.completions.create(
+                model="test",
+                messages=messages,
+                max_tokens=self.chatgpt_max_tokens,
+                n=1,
+                temperature=0,
+            )
+            answer = response.choices[0].message.content.strip()
+
+            self.chatmol_llm_conversation_history.append(
+                {"role": "assistant", "content": answer}
+            )
             return answer
         except Exception as e:
             print(f"Error: {e}")

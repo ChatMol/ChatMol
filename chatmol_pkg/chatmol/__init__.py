@@ -12,6 +12,9 @@ def chat_with_gpt(message):
 def chat_with_claude(message):
     return defaul_client.chat_with_claude(message)
 
+def chat_with_chatmol_llm(message):
+    return defaul_client.chat_with_chatmol_llm(message)
+
 def clear_stashed_commands():
     return defaul_client.clear_stashed_commands()
 
@@ -25,3 +28,5 @@ def start_pymol_gui():
 
 def warnings():
     return defaul_client.warnings
+
+__version__ = "0.3.0"

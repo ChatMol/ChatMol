@@ -65,7 +65,7 @@ def start_server():
 def init_server():
     server_thread = threading.Thread(target=start_server)
     server_thread.start()
-    # server_thread.join()
+
     print("Server started")
 
 conversation_history = ""
