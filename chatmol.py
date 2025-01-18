@@ -64,7 +64,7 @@ def start_server():
 def init_server():
     server_thread = threading.Thread(target=start_server)
     server_thread.start()
-    # server_thread.join()
+
     print("Server started")
 
 conversation_history = ""
@@ -74,7 +74,7 @@ stashed_commands = []
 # Save API Key in ~/.PyMOL/apikey.txt
 API_KEY_FILE = os.path.expanduser('~')+"/.PyMOL/apikey.txt"
 OPENAI_KEY_ENV = "OPENAI_API_KEY"
-GPT_MODEL = "gpt-3.5-turbo-1106"
+GPT_MODEL = "gpt-4o"
 client = None
 
 def set_api_key(api_key):
