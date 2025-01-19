@@ -10,6 +10,7 @@ from pymol import cmd
 
 
 class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
+
     def __init__(self):
 
         from http import HTTPStatus
@@ -471,6 +472,7 @@ cmd.extend("chat", pymol_assistant.send_message)
 cmd.extend("chatlite", pymol_assistant.chatlite)
 cmd.extend("update_model", pymol_assistant.update_model)
 cmd.extend("init_server", init_server)
+
 
 cmd.extend("save_conversation", pymol_assistant.save_conversation)
 cmd.extend("load_conversation", pymol_assistant.load_conversation)

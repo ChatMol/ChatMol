@@ -83,6 +83,9 @@ See more details in [here](./copilot_public/README.md)
 
 - The [ChatMol web-browser interface](http://xp.chatmol.org/chatmol.html) allows you to submit PyMOL requests and execute them in PyMOL via ChatMol. (Please note that this feature is browser setting-dependent)
 
+## Acknowledgements
+
+As an open source project, we thank the support from [ChemXAI](https://www.chemxai.com/), [WeComput](https://www.wecomput.com/) and [levinthal](https://www.levinthal.bio/).
 
 ## License
 This project is released under the MIT License.

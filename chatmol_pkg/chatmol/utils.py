@@ -8,7 +8,7 @@ class ChatMol:
     def __init__(self,
                 openai_api_key=None, 
                 verbose=False,
-                gpt_model="gpt-3.5-turbo-1106",
+                gpt_model="gpt-4o",
                 chatgpt_max_history=10,
                 chatgpt_temp=0,
                 chatgpt_max_tokens=2048,
@@ -29,6 +29,7 @@ class ChatMol:
         self.claude_conversation_messages = []
         self.chatmol_llm_conversation_history = []
         self.chatgpt_sys_prompt = "You are an expert familiar with PyMOL and specialized in providing PyMOL command line code solutions accuratly, and concisely. "
+        self.chatgpt_sys_prompt += "You think step-by-step before you conclude correctly. "
         self.chatgpt_sys_prompt += "When providing demos or examples, try to use 'fetch' if object name is not provided. "
         self.chatgpt_sys_prompt += "Prefer academic style visulizations. Code within triple backticks, comment and code should not in the same line. "
         self.chatmol_llm_prompt_dict = {
