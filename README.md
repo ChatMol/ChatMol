@@ -1,7 +1,8 @@
 # ChatMol
 Started from a PyMol plugin, towards a comprehensive molecular design assistant.
 
-![GitHub license](https://img.shields.io/github/license/ChatMol/ChatMol)  ![GitHub issues](https://img.shields.io/github/issues/ChatMol/ChatMol) ![GitHub forks](https://img.shields.io/github/forks/ChatMol/ChatMol)  ![GitHub stars](https://img.shields.io/github/stars/ChatMol/ChatMol)
+![GitHub license](https://img.shields.io/github/license/ChatMol/ChatMol)  ![GitHub issues](https://img.shields.io/github/issues/ChatMol/ChatMol) ![GitHub forks](https://img.shields.io/github/forks/ChatMol/ChatMol)  ![GitHub stars](https://img.shields.io/github/stars/ChatMol/ChatMol)  
+Our paper "ChatMol Copilot: An Agent for Molecular Modeling and Computation Powered by LLMs" has been accepted for oral presentation at the First Workshop on Language and Molecules (L+M 2024), co-located with ACL 2024. [![Paper](https://img.shields.io/badge/Paper-L%2BM%20Workshop%20ACL%202024-blue)](https://aclanthology.org/2024.langmol-1.7/)
 
 ## Overview
 <details>
@@ -74,7 +75,7 @@ pip install chatmol
 
 ## Copilot
 This is ChatMol copilot, just like other copilot, it is designed to help your work.  
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/9uMFZMQqTf8/0.jpg)](https://www.youtube.com/watch?v=9uMFZMQqTf8)
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/9uMFZMQqTf8/0.jpg)](https://www.youtube.com/watch?v=9uMFZMQqTf8)  
 See more details in [here](./copilot_public/README.md)
 
 ## ChatMol Website
@@ -85,7 +86,7 @@ See more details in [here](./copilot_public/README.md)
 
 ## Acknowledgements
 
-As an open source project, we thank the support from [ChemXAI](https://www.chemxai.com/), [WeComput](https://www.wecomput.com/) and [levinthal](https://www.levinthal.bio/).
+As an open source project, we thank the support from [ChemXAI](https://www.chemxai.com/), [WeComput](https://www.wecomput.com/) and [Levinthal](https://www.levinthal.bio/).
 
 ## License
 This project is released under the MIT License.
