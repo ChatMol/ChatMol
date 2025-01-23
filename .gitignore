@@ -142,4 +142,7 @@ cf08d4763cf8b0309f2aa182c253388d712a1b736d4eb34f226c74588995faa0*
 e9bbca7f41ac6c03b3a6c3193115e8ac8a4c4fd572a4230577a81c432b2cacfe*
 06377e8a560dca176f9a7d7ac9e3184c6c67e13aa1e9a6a3972e2fde8952375b*
 copilot_public/Project-*
+
 chatmol_claude_test.py
+model_info.json
+ollama.sh
