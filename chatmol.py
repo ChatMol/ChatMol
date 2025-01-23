@@ -8,7 +8,6 @@ from typing import Dict, List, Optional, Literal, Union
 from datetime import datetime
 from pymol import cmd
 
-
 class PyMOLCommandHandler(http.server.BaseHTTPRequestHandler):
 
     def __init__(self):
@@ -78,7 +77,7 @@ class PyMOLAgent:
     def __init__(
         self,
         model: str = "gpt-4o",
-        provider: Optional[Literal["openai", "anthropic"]] = None,
+        provider: Optional[Literal["openai", "anthropic", "deepseek"]] = None,
         system_message: Optional[str] = None,
     ):
         self.config_dir = os.path.expanduser("~/.PyMOL")
@@ -93,7 +92,7 @@ class PyMOLAgent:
         self.api_key = self.get_api_key()
         
         if not self.api_key:
-            raise ValueError(f"Please set {'ANTHROPIC' if self.provider == 'anthropic' else 'OPENAI'}_API_KEY environment variable or configure it in {self.config_file}")
+            Warning(f"Please set {'ANTHROPIC' if self.provider == 'anthropic' else 'OPENAI'}_API_KEY environment variable or configure it in {self.config_file}")
 
         self.system_message = system_message or """You are a PyMOL expert assistant, specialized in providing command line code solutions related to PyMOL. 
 Generate clear and effective solutions. 

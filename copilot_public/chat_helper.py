@@ -351,7 +351,7 @@ class ConversationHandler:
                         "content": function_response,
                     }
                 )
-            second_response = client.chat.completions.create(
+            second_response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=self.messages,
             )  # get a new response from the model where it can see the function response
