@@ -76,6 +76,7 @@ def submit_docking_task(protein_file, ligand_file, center_x=0, center_y=0, cente
     if aa_list:
         files['aa_list'] = (None, aa_list)
     response = requests.post('https://dockingapi.cloudmol.org/api/dock', headers=headers, files=files)
+    # breakpoint()
     return response.json()
 
 def submit_pocket_prediction_task(protein_file):
@@ -142,6 +143,7 @@ def redis_reader(key):
 class ChatmolFN:
     def __init__(self, work_dir="./"):
         self.WORK_DIR = "./"
+        print("WORK_DIR = ", self.WORK_DIR)
         self.STREAMLIT_GUI = True
         self.VIEW_DICTS = {}
         self.viewer_height = 300
@@ -280,8 +282,9 @@ class ChatmolFN:
         docking_code = submit_docking_task(protein_pdb_file_path, ligand_pdb_file_path, aa_list=pocket_aas)
         docking_code = docking_code['hash_code']
         print(docking_code)
+        time.sleep(15)
         status = ""
-        status_prev = ''
+
         print("status:")
         while status != '"completed"':
             status = query_docking_status(docking_code)

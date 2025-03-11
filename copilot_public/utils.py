@@ -45,7 +45,7 @@ def test_openai_api(api_key):
     client = OpenAI(api_key=api_key)
     try:
         response = client.chat.completions.create(
-                    model="gpt-3.5-turbo-1106",
+                    model="gpt-4o-mini",
                     messages=[{"role": "user", "content": "Test prompt"}],
                     max_tokens=10,
                 )
@@ -54,6 +54,21 @@ def test_openai_api(api_key):
 
     except Exception as e:
         print("OpenAI API is not working")
+        return False
+    
+def test_ds_api(api_key):
+    client = OpenAI(api_key=api_key)
+    try:
+        response = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=[{"role": "user", "content": "Test prompt"}],
+                    max_tokens=10,
+                )
+        print(response)
+        return True
+
+    except Exception as e:
+        print("DeepSeek API is not working")
         return False
 
 

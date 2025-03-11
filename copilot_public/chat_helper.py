@@ -1,8 +1,4 @@
 import json
-import os
-import rdkit
-import time
-import pandas as pd
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 from openai.types.chat.chat_completion_message_tool_call import (
     Function,
@@ -13,7 +9,7 @@ import chatmol_fn as cfn
 
 
 class ConversationHandler:
-    def __init__(self, client, cfn, model_name="gpt-3.5-turbo-1106"):
+    def __init__(self, client, cfn, model_name="gpt-4o"):
         self.client = client
         self.model_name = model_name
         self.cfn = cfn
