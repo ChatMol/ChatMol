@@ -146,3 +146,6 @@ copilot_public/Project-*
 chatmol_claude_test.py
 model_info.json
 ollama.sh
+cmds.txt
+CLAUDE.md
+.claude/
