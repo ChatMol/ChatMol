@@ -10,11 +10,14 @@ Our paper "ChatMol Copilot: An Agent for Molecular Modeling and Computation Powe
 
 - [ChatMol](#chatmol)
   - [Overview](#overview)
+  - [PyMOL Skill](#pymol-skill)
   - [PyMOL Plugin](#pymol-plugin)
+    - [v2 (Recommended)](#v2-recommended)
   - [ChatMol + Streamlit](#chatmol--streamlit)
   - [ChatMol python package](#chatmol-python-package)
   - [Copilot](#copilot)
   - [ChatMol Website](#chatmol-website)
+  - [Acknowledgements](#acknowledgements)
   - [License](#license)
 </details>
 
@@ -30,36 +33,74 @@ We aim to leverage the capabilities of large language models to better assist sc
 
 Through these tools, we strive to empower scientists to better utilize large language models in solving scientific problems. Our goal is to bridge the gap between advanced AI capabilities and practical scientific research needs in molecular biology and related fields.
 
+## PyMOL Skill
+A skill that lets agents generate publication-quality molecular structure figures using PyMOL. You describe what you want to see, a binding site for example, and the LLM writes a `.pml` script, runs it headlessly, and hands you the rendered PNG, the script, and a `.pse` session file you can open in PyMOL to keep tweaking.
+**How to Install?**
+The easiest way to use the PyMOL skill is through **coding agent** or **openclaw**. Simply ask it to `Install the PyMOL skill from https://github.com/ChatMol/ChatMol/tree/main/pymol_skill` and it will automatically set it up for you.
+
+If you prefer to do it manually, drop the `pymol_skill/` folder into your skills directory:
+
+- **Claude Code:** place in `.claude/skills/` in your project root, or in `~/.claude/skills/` for global access
+- **Codex / other agents:** point the skill config to the folder so the agent reads `SKILL.md` on trigger
+
+<!-- a table of figures -->
+| Protein overview                          | Binding site                        | Protein-protein interface       |
+| ----------------------------------------- | ----------------------------------- | ------------------------------- |
+| ![](./assets/5xh3_vs_4eb0_comparison.png) | ![](./assets/5xh3_binding_site.png) | ![](./assets/6m0j_overview.png) |
+| compare 4eb0 and 5xh3                     | show ligand interactions in 5xh3    | show PPI interface in 6m0j      |
+
 ## PyMOL Plugin
 
-**Installation**  
-Simply run the following command in PyMOL command line to install the plugin:
+An LLM-powered plugin for PyMOL that translates natural language into molecular visualization workflows.
 
+**Versions**
+
+| Directory          | Description                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `pymol_plugin/v2/` | Agentic plugin with tool-calling loop, session inspection, vision feedback, and Qt5 GUI. |
+| `pymol_plugin/v1/` | Original plugin with direct LLM-to-command translation.                                  |
+
+### v2 (Recommended)
+
+**Installation**
 ```python
-load https://raw.githubusercontent.com/ChatMol/ChatMol/main/chatmol.py
+run /path/to/pymol_plugin/v2/chatmol.py
 ```
 
-For permanent installation, go to `Plugin` -> `Plugin Manager` -> `Install New Plugin` and enter the URL `https://raw.githubusercontent.com/ChatMol/ChatMol/main/chatmol.py`.
-
-**Usage**  
-The simplest way to get started is to use the `chatlite` command in PyMOL. 
+**Quick start**
 ```pymol
-chatlite download 1ake and color it by secondary structures
+set_api_key sk-or-xxxx
+chat fetch 1ubq and show as cartoon
+chat fetch 3wzm, show enzyme-substrate interactions in chain A with publication quality
 ```
 
-![img](./assets/img_ss.png)
+Supported providers include OpenRouter, DeepSeek, Kimi (Moonshot), and GLM via OpenAI-compatible APIs.
 
-Refer to the [doc](./pymol_plugin/README.md) for more details.
+<details>
+<summary>v1 (Legacy)</summary>
 
-**miniGUI**  
-We also provide a miniGUI for ChatMol-Lite, which can be used as a task execution agent or Q&A chatbot. It retains your entire conversation history with ChatMol, and you have the flexibility to modify the execution plan suggested by ChatMol. For example, you can delete certain commands or add additional commands before sending them to PyMOL. You can launch the miniGUI from a terminal.
-
-```bash
-cd miniGUI
-python miniGUI.py
+**Installation**
+```python
+load https://chatmol.com/pymol_plugins/chatmol-latest.py
 ```
-Here is a screenshot of the miniGUI:
-![img](./assets/chatmol_lite.png)
+
+**Quick start**
+```pymol
+chatlite show me a protein
+set_api_key openai, sk-proj-xxxx
+chat show me a protein
+```
+
+For self-hosted models via Ollama:
+```pymol
+update_model phi-4@ollama
+```
+
+</details>
+
+![](./pymol_plugin/demo.png)
+
+See the full plugin documentation in [pymol_plugin/README.md](./pymol_plugin/README.md).
 
 ## ChatMol + Streamlit
 
